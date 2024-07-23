@@ -7,12 +7,13 @@ import Invoices from './components/Invoices.jsx';
 import ClientAddress from './components/ClientAddress.jsx';
 import InvoiceRegister from './components/InvoiceRegister.jsx';
 function App() {
-  const basePath = window.location.pathname
+  const basePath = window.location.pathname.startsWith('/main_window') ? '/main_window' : '/';
   
   return (
     <div className='App'>
-            <h1 className='title' >Quality Book Binding</h1>
+            {/* <h1 className='title' >Quality Book Binding</h1> */}
             <div className="page_container w-full h-full"> 
+              {/* routes */}
                 <Routes>
                     <Route path={`${basePath}`} element={<Home />}></Route>
                     <Route path={`${basePath}/clients`} element={<Clients />}></Route>

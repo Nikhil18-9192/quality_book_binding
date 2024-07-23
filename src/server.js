@@ -143,5 +143,43 @@ async function getInvoicesByDateRange(dateFrom, dateTo, pageNumber) {
   }
 }
 
+async function getParticulars(id) {
+  try {
+    const query = `SELECT srno, invoiceno, particulars, quantity, rate, rowsubtotal, cgst, sgst, rowtotal, submitdate FROM invoicemaster WHERE invoiceno = $1`;
+    const values = [id];
+    const result = await pool.query(query, values);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching client:', error);
+    throw error;
+  }
+}
 
-module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange }
+async function getInvoiceDetails(){
+  try{
+    const latest_invoice = await pool.query('SELECT invoiceno from invoicedb ORDER BY invoiceno DESC LIMIT 1');
+  const all_clients = await pool.query('SELECT * from clients');
+  return {latest_invoice:latest_invoice.rows[0].invoiceno, all_clients:all_clients.rows};
+
+  }catch (error){
+    console.log('Error querying database:', error)
+    throw error
+  }
+  
+}
+
+async function getAddressList(id){
+  try{
+    const query = 'SELECT srno, address, clientname FROM clientaddress WHERE clientid = $1';
+    const values = [id];
+    const result = await pool.query(query, values);
+    
+    return result.rows;
+  } catch (error){
+    console.log('Error querying database:', error)
+    throw error
+  }
+}
+
+
+module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList };

@@ -16,10 +16,10 @@ function Home() {
         <HiReceiptTax className='nav-icon' /> GST Summery
         </Link>
       <Link to={`${basePath}/invoices`} className=' nav-link'>
-        <FaFileInvoice className='nav-icon' />Invoices
+        <FaFileInvoice className='nav-icon' />Invoices Register
       </Link>
       <Link to={`${basePath}/invoiceRegister`} className='nav-link'>
-      <GrDatabase className='nav-icon' />Invoice Register
+      <GrDatabase className='nav-icon' />Create Invoice
       </Link>
     </div>
   )

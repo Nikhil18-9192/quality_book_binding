@@ -82,6 +82,34 @@ contextBridge.exposeInMainWorld('electronAPI', {
             console.log('Error querying database:', error)
             throw error
         }
+    },
+    getParticulars: async(id)=>{
+        try {
+            const result = await ipcRenderer.invoke('getParticulars', id);
+            return result;
+        } catch (error) {
+            console.log('Error querying database:', error)
+            throw error
+        }
+    },
+    getInvoiceDetails: async()=>{
+        try {
+            const result = await ipcRenderer.invoke('getInvoiceDetails');
+            return result;
+        } catch (error) {
+            console.log('Error querying database:', error)
+            throw error
+        }
+    },
+    getAddressList: async(id)=>{
+        try {
+            
+            const result = await ipcRenderer.invoke('getAddressList', id);
+            return result;
+        } catch (error) {
+            console.log('Error querying database:', error)
+            throw error
+        }
     }
 
 });

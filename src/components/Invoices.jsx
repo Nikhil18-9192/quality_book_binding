@@ -163,7 +163,7 @@ function Invoices() {
           </tbody>
         </table>
       </div>
-      {invoice != null ? <InvoicePdf invoice={invoice} /> : null}
+      {invoice != null ? <InvoicePdf invoice={invoice} setInvoice={setInvoice} /> : null}
       
     </div>
   )

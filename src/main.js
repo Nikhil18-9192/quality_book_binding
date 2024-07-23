@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
-const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange } = require('./server.js');
+const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList } = require('./server.js');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -21,8 +21,20 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // Handle navigation and refresh
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    event.preventDefault();
+    if (url !== MAIN_WINDOW_WEBPACK_ENTRY) {
+      mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).then(() => {
+        mainWindow.webContents.executeJavaScript(`window.history.pushState({}, "", "${url}")`);
+      });
+    }
+  });
+
+  mainWindow.webContents.on('did-fail-load', () => {
+    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  });
+
 };
 
 // This method will be called when Electron has finished
@@ -78,6 +90,15 @@ ipcMain.handle('getInvoiceByInvoiceNo', async (event, invoiceno)=>{
 })
 ipcMain.handle('getInvoicesByDateRange', async(event, dateFrom, dateTo, pageNumber)=>{
   return await getInvoicesByDateRange(dateFrom, dateTo,pageNumber)
+})
+ipcMain.handle('getParticulars', async (event, id) => {
+  return await getParticulars(id);
+})
+ipcMain.handle('getInvoiceDetails', async () => {
+  return await getInvoiceDetails();
+})
+ipcMain.handle('getAddressList', async (event, id) => {
+  return await getAddressList(id);
 })
 
 // Handle print request
