@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineClear } from "react-icons/ai";
-import InvoicePdf from './InvoicePdf.jsx';
+import InvoicePdf from './InvoicePdf.js';
 // import InvoicePdf from './InvoicePdf';
 
 function Invoices() {

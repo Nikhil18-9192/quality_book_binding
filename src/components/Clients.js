@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AddClients from './AddClients.jsx';
+import AddClients from './AddClients.js';
 
 function Clients() {
   const [query, setQuery] = useState('');

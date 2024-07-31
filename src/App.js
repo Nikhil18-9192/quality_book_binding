@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import './app.scss'
 import { Routes, Route, Link } from 'react-router-dom';
-import Home from './components/Home.jsx';
-import Clients from './components/Clients.jsx';
-import Invoices from './components/Invoices.jsx';
-import ClientAddress from './components/ClientAddress.jsx';
-import InvoiceRegister from './components/InvoiceRegister.jsx';
+import Home from './components/Home.js';
+import Clients from './components/Clients.js';
+import Invoices from './components/Invoices.js';
+import ClientAddress from './components/ClientAddress.js';
+import InvoiceRegister from './components/InvoiceRegister.js';
 function App() {
   const basePath = window.location.pathname.startsWith('/main_window') ? '/main_window' : '/';
   
