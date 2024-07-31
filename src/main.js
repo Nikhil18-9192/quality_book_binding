@@ -16,24 +16,26 @@ const createWindow = () => {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
     autoHideMenuBar: true,
+    contextIsolation: false,
+    nodeIntegration: true
   });
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Handle navigation and refresh
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    event.preventDefault();
-    if (url !== MAIN_WINDOW_WEBPACK_ENTRY) {
-      mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).then(() => {
-        mainWindow.webContents.executeJavaScript(`window.history.pushState({}, "", "${url}")`);
-      });
-    }
-  });
+  // mainWindow.webContents.on('will-navigate', (event, url) => {
+  //   event.preventDefault();
+  //   if (url !== MAIN_WINDOW_WEBPACK_ENTRY) {
+  //     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).then(() => {
+  //       mainWindow.webContents.executeJavaScript(`window.history.pushState({}, "", "${url}")`);
+  //     });
+  //   }
+  // });
 
-  mainWindow.webContents.on('did-fail-load', () => {
-    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  });
+  // mainWindow.webContents.on('did-fail-load', () => {
+  //   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  // });
 
 };
 
