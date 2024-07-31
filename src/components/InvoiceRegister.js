@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 function InvoiceRegister() {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ function InvoiceRegister() {
     sacforclient:''
   })
   const [addresses, setAddreses] = useState([])
+  const [lastInvoice, setLastInvoice] = useState({})
   const [invoiceDetail, setINvoiceDetail] = useState({
     invoiceno:'',
     clientid:'',
@@ -24,11 +27,12 @@ function InvoiceRegister() {
     total:'',
     cgst:'',
     sgst:'',
+    remark:'',
     perticulars:[]
   })
 
   const [perticular, setPerticular] = useState({
-    description:'Binding of',
+    description:'Binding of ',
     quantity:'',
     rate:'',
     total:'',
@@ -44,10 +48,28 @@ function InvoiceRegister() {
   const getInvoiceDetails = async()=>{
     const result = await window.electronAPI.getInvoiceDetails();
     setClients(result.all_clients)
-    setINvoiceDetail({
-      ...invoiceDetail,
-      invoiceno:result.latest_invoice + 1
-    })
+    setLastInvoice(result.latest_invoice)
+  }
+
+  function getNextInvoiceNumber(lastInvoiceDetails, newInvoiceDate) {
+    console.log(lastInvoiceDetails, newInvoiceDate, 'test1')
+    // Parse the last invoice date and new invoice date to Date objects
+    const lastInvoiceDate = new Date(lastInvoiceDetails.date);
+    const newInvoice = new Date(newInvoiceDate);
+
+  
+    // Extract year and month from the dates
+    const lastInvoiceYear = lastInvoiceDate.getFullYear();
+    const lastInvoiceMonth = lastInvoiceDate.getMonth(); // 0-indexed (0 = January, 2 = March, 3 = April)
+    const newInvoiceYear = newInvoice.getFullYear();
+    const newInvoiceMonth = newInvoice.getMonth(); // 0-indexed (0 = January, 3 = April)
+    
+    // Check if the last invoice date is in March and the new invoice date is in April of the next financial year
+    if ((lastInvoiceMonth === 2 && newInvoiceMonth > 2) || (lastInvoiceMonth ===2 && newInvoiceMonth <= 2 && newInvoiceYear > lastInvoiceYear)) {
+      return 1; // Reset invoice number to 1
+    } else {
+      return lastInvoiceDetails.invoiceno + 1; // Increment the last invoice number by 1
+    }
   }
 
   const handleSelectClient = async(e) => {
@@ -72,6 +94,17 @@ function InvoiceRegister() {
 
   const handleChange = (e) => {
     const {name, value} = e.target
+
+    if(name == 'invoicedate'){
+      console.log(name, value,'test2');
+      const newInvoiceNo = getNextInvoiceNumber(lastInvoice, value)
+      setINvoiceDetail({
+        ...invoiceDetail,
+        [name]: value,
+        invoiceno: newInvoiceNo
+      })
+      return
+    }
     
     setINvoiceDetail({
       ...invoiceDetail,
@@ -88,12 +121,16 @@ function InvoiceRegister() {
   }
 
   const addPerticular = () => {
+    if(perticular.rate == '' || perticular.quantity == ''){
+      toast.error('Please fill rate and quantity')
+      return
+    }
     const updatePerticular = {
       ...perticular,
       cgst: ((Number(perticular.quantity) * Number(perticular.rate)) * 9) / 100,
       sgst: ((Number(perticular.quantity) * Number(perticular.rate)) * 9) / 100,
       subtotal: Number(perticular.quantity) * Number(perticular.rate),
-      total: (Number(perticular.quantity) * Number(perticular.rate)) + ((((Number(perticular.quantity) * Number(perticular.rate)) * 9) / 100)*2)
+      total: ((Number(perticular.quantity) * Number(perticular.rate)) + ((((Number(perticular.quantity) * Number(perticular.rate)) * 9) / 100)*2)).toFixed(2)
     }
       
     setINvoiceDetail({
@@ -128,6 +165,60 @@ function InvoiceRegister() {
     })
   }
 
+  const handleSubmit = async () => {
+      if(invoiceDetail.invoicedate == '' || invoiceDetail.clientid == ''|| invoiceDetail.address == ''){
+        toast.error('Please fill all the fields')
+        return
+      }
+      if(invoiceDetail.perticulars.length == 0){
+        toast.error('Please add perticulars')
+        return
+      }
+
+      const payload = {...invoiceDetail, ...client}
+      
+      try {
+        const result = await window.electronAPI.addInvoice(payload);
+        if(result){
+          toast.success('Invoice created successfully')
+          setINvoiceDetail({
+            invoiceno:'',
+            clientid:'',
+            address:'',
+            invoicedate:'',
+            subtotal:'',
+            total:'',
+            cgst:'',
+            sgst:'',
+            remark:'',
+            perticulars:[]
+          })
+          setPerticular({
+            description:'Binding of ',
+            quantity:'',
+            rate:'',
+            total:'',
+            cgst:'',
+            sgst:'',
+            subtotal:''
+          })
+          setClient({
+            clientname:'',
+            clientid:'',
+            bankname:'',
+            bankifsc:'',
+            bankaccountnumber:'',
+            bankbranch:'',
+            clientgstin:'',
+            sacforclient:''
+          })
+        }
+        
+      } catch (error) {
+        toast.error(error.message)
+      }
+  }
+
   useEffect(() => {
     getInvoiceDetails()
   },[])
@@ -135,7 +226,7 @@ function InvoiceRegister() {
     <div className='invoice_container'>
       <h3 className='back-btn' onClick={goBack}>{"< Home"}</h3>
       <h1 className='page_title'>Create Invoice</h1>
-
+      <ToastContainer />
       <div className="form_container">
         <form onSubmit={(e)=> e.preventDefault()}>
           <div className="client_info">
@@ -186,11 +277,11 @@ function InvoiceRegister() {
             </div>
             <div>
                 <label htmlFor="quantity">Quantity</label>
-                <input type="text" name="quantity" id="quantity" value={perticular.quantity} onChange={e=>handleChangePerticular(e)} />
+                <input type="text" name="quantity" id="quantity" placeholder='30' value={perticular.quantity} onChange={e=>handleChangePerticular(e)} />
             </div>
             <div>
                 <label htmlFor="rate">Rate</label>
-                <input type="text" name="rate" id="rate" value={perticular.rate} onChange={e=>handleChangePerticular(e)} />
+                <input type="text" name="rate" id="rate" value={perticular.rate} placeholder='60' onChange={e=>handleChangePerticular(e)} />
             </div>
             <div>
               <button className='add_btn' onClick={addPerticular}>Add</button>
@@ -226,14 +317,29 @@ function InvoiceRegister() {
               </tbody>
             </table>
           </div>
-            <div className="total_count">
-              <p>Total: ₹{invoiceDetail.subtotal} </p>
-              <p>CGST 9%:₹{invoiceDetail.cgst}</p>
-              <p>SGST 9%:₹{invoiceDetail.sgst}</p>
-              <p>Grand Total: ₹{invoiceDetail.total}</p>
+          <div className="bottom_section">
+            <div className="bank_details">
+              <p>Bank Details</p>
+              <p>Bank Name: {client.bankname}</p>
+              <p>Account No: {client.bankaccountnumber}</p>
+              <p>IFSC Code: {client.bankifsc}</p>
+
             </div>
+            <div className="remark">
+              <label htmlFor="remark">Remark</label>
+              <textarea cols={30} rows={3} name="remark" id="remark" value={invoiceDetail.remark} onChange={e=>handleChange(e)}/>
+            </div>
+          <div className="total_count">
+              <p>Total: <span>₹ {invoiceDetail.subtotal}</span> </p>
+              <p>CGST 9%: <span>₹ {invoiceDetail.cgst}</span></p>
+              <p>SGST 9%: <span>₹ {invoiceDetail.sgst}</span></p>
+              <p>Grand Total: <span>₹ {invoiceDetail.total}</span></p>
+            </div>
+
+          </div>
+            
             <div className="submit_btn_container">
-              <button className='submit_btn'>Submit</button>
+              <button className='submit_btn' onClick={handleSubmit}>Submit</button>
             </div>
         </form>
       </div>

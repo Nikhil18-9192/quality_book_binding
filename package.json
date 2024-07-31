@@ -29,6 +29,7 @@
     "electron": "31.2.0",
     "file-loader": "^6.2.0",
     "node-loader": "^2.0.0",
+    "react-toastify": "^10.0.5",
     "style-loader": "^3.3.4"
   },
   "keywords": [],

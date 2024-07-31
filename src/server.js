@@ -157,9 +157,9 @@ async function getParticulars(id) {
 
 async function getInvoiceDetails(){
   try{
-    const latest_invoice = await pool.query('SELECT invoiceno from invoicedb ORDER BY invoiceno DESC LIMIT 1');
+    const latest_invoice = await pool.query('SELECT invoiceno, date from invoicedb ORDER BY srno DESC LIMIT 1');
   const all_clients = await pool.query('SELECT * from clients');
-  return {latest_invoice:latest_invoice.rows[0].invoiceno, all_clients:all_clients.rows};
+  return {latest_invoice:latest_invoice.rows[0], all_clients:all_clients.rows};
 
   }catch (error){
     console.log('Error querying database:', error)
@@ -181,5 +181,69 @@ async function getAddressList(id){
   }
 }
 
+async function addInvoice(invoiceDetails) {
+  const client = await pool.connect();
 
-module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList };
+  try {
+    await client.query('BEGIN');
+
+    // Insert data into invoicedb table
+    const insertInvoiceQuery = `
+      INSERT INTO invoicedb (invoiceno,date, clientname, address, gstin, sacforclient, bankname, bankbranch, bankaccno, bankifsc, subtotal, cgst, sgst, total, remark)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,$15)
+      RETURNING invoiceno
+    `;
+    const invoiceValues = [
+      invoiceDetails.invoiceno,
+      invoiceDetails.invoicedate,
+      invoiceDetails.clientname,
+      invoiceDetails.address,
+      invoiceDetails.clientgstin,
+      invoiceDetails.sacforclient,
+      invoiceDetails.bankname,
+      invoiceDetails.bankbranch,
+      invoiceDetails.bankaccountnumber,
+      invoiceDetails.bankifsc,
+      invoiceDetails.subtotal,
+      invoiceDetails.cgst,
+      invoiceDetails.sgst,
+      invoiceDetails.total,
+      invoiceDetails.remark
+    ];
+
+    const invoiceResult = await client.query(insertInvoiceQuery, invoiceValues);
+    const invoiceno = invoiceResult.rows[0].invoiceno;
+
+    // Insert data into invoicemaster table
+    const insertParticularsQuery = `
+      INSERT INTO invoicemaster (invoiceno, particulars, quantity, rate, rowsubtotal, cgst, sgst, rowtotal)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `;
+
+    for (const item of invoiceDetails.perticulars) {
+      const particularsValues = [
+        invoiceno,
+        item.description,
+        item.quantity,
+        item.rate,
+        item.subtotal,
+        item.cgst,
+        item.sgst,
+        item.total
+      ];
+      await client.query(insertParticularsQuery, particularsValues);
+    }
+
+    await client.query('COMMIT');
+    return { success: true, invoiceno };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error inserting data:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+
+module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList, addInvoice };
