@@ -10,7 +10,10 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        authors: 'Nikhil Korane',
+        description: 'An Qaulity Book Binding Electron app'
+      },
     },
     {
       name: '@electron-forge/maker-zip',
