@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
+import InvoicePdf from './InvoicePdf';
 
 function InvoiceRegister() {
   const navigate = useNavigate();
@@ -41,18 +42,22 @@ function InvoiceRegister() {
     subtotal:''
   })
 
+  const [invoice, setInvoice] = useState(null)
+
   const goBack = () => {
     navigate(-1)
   }
 
   const getInvoiceDetails = async()=>{
     const result = await window.electronAPI.getInvoiceDetails();
+    const today = new Date();
+    const invoiceno = getNextInvoiceNumber(result.latest_invoice, today)
     setClients(result.all_clients)
     setLastInvoice(result.latest_invoice)
+    setINvoiceDetail({...invoiceDetail, invoiceno:invoiceno, invoicedate:today.toISOString().slice(0, 10)})
   }
 
   function getNextInvoiceNumber(lastInvoiceDetails, newInvoiceDate) {
-    console.log(lastInvoiceDetails, newInvoiceDate, 'test1')
     // Parse the last invoice date and new invoice date to Date objects
     const lastInvoiceDate = new Date(lastInvoiceDetails.date);
     const newInvoice = new Date(newInvoiceDate);
@@ -166,6 +171,7 @@ function InvoiceRegister() {
   }
 
   const handleSubmit = async () => {
+
       if(invoiceDetail.invoicedate == '' || invoiceDetail.clientid == ''|| invoiceDetail.address == ''){
         toast.error('Please fill all the fields')
         return
@@ -175,7 +181,15 @@ function InvoiceRegister() {
         return
       }
 
+      const confirm = window.confirm('Do you want to round of total?')
+
+      if(confirm){
+        invoiceDetail.total = Math.round(invoiceDetail.total).toFixed(2)
+      }
+
       const payload = {...invoiceDetail, ...client}
+
+      console.log(payload, 'payload');
       
       try {
         const result = await window.electronAPI.addInvoice(payload);
@@ -212,11 +226,15 @@ function InvoiceRegister() {
             clientgstin:'',
             sacforclient:''
           })
+          console.log(invoice)
+          setInvoice(result.invoice)
+          console.log(result.invoice)
         }
         
       } catch (error) {
         toast.error(error.message)
       }
+
   }
 
   useEffect(() => {
@@ -319,14 +337,14 @@ function InvoiceRegister() {
           </div>
           <div className="bottom_section">
             <div className="bank_details">
-              <p>Bank Details</p>
+              <p className="info_title">Bank Details</p>
               <p>Bank Name: {client.bankname}</p>
               <p>Account No: {client.bankaccountnumber}</p>
               <p>IFSC Code: {client.bankifsc}</p>
 
             </div>
             <div className="remark">
-              <label htmlFor="remark">Remark</label>
+              <label htmlFor="remark">Remark:</label>
               <textarea cols={30} rows={3} name="remark" id="remark" value={invoiceDetail.remark} onChange={e=>handleChange(e)}/>
             </div>
           <div className="total_count">
@@ -339,13 +357,14 @@ function InvoiceRegister() {
           </div>
             
             <div className="submit_btn_container">
-              <button className='submit_btn' onClick={handleSubmit}>Submit</button>
+              <button className='submit_btn' onClick={handleSubmit}>Save and Print</button>
             </div>
         </form>
       </div>
-        
+      {invoice && <InvoicePdf invoice={invoice} setInvoice={setInvoice}/>}
     </div>
   )
 }
+
 
 export default InvoiceRegister

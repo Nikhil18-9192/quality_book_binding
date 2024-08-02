@@ -110,6 +110,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
             console.log('Error querying database:', error)
             throw error
         }
+    },
+    addInvoice: async(invoiceDetails)=>{
+        try {
+            const result = await ipcRenderer.invoke('addInvoice', invoiceDetails);
+            return result;
+        } catch (error) {
+            console.log('Error querying database:', error)
+            throw error
+        }
     }
 
 });

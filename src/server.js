@@ -33,7 +33,7 @@ async function getInvoice(pageNumber) {
      // Calculate the total number of pages
      const totalPages = Math.ceil(totalRows / pageSize);
 
-    const query = `SELECT * FROM invoicedb LIMIT $1 OFFSET $2`;
+    const query = `SELECT * FROM invoicedb ORDER BY srno DESC LIMIT $1 OFFSET $2`;
     const result = await pool.query(query, [pageSize, offset]);
     return { data: result.rows, totalPages:totalPages };
   } catch (error) {
@@ -191,7 +191,7 @@ async function addInvoice(invoiceDetails) {
     const insertInvoiceQuery = `
       INSERT INTO invoicedb (invoiceno,date, clientname, address, gstin, sacforclient, bankname, bankbranch, bankaccno, bankifsc, subtotal, cgst, sgst, total, remark)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,$15)
-      RETURNING invoiceno
+      RETURNING *
     `;
     const invoiceValues = [
       invoiceDetails.invoiceno,
@@ -212,7 +212,7 @@ async function addInvoice(invoiceDetails) {
     ];
 
     const invoiceResult = await client.query(insertInvoiceQuery, invoiceValues);
-    const invoiceno = invoiceResult.rows[0].invoiceno;
+    const invoice = invoiceResult.rows[0];
 
     // Insert data into invoicemaster table
     const insertParticularsQuery = `
@@ -222,7 +222,7 @@ async function addInvoice(invoiceDetails) {
 
     for (const item of invoiceDetails.perticulars) {
       const particularsValues = [
-        invoiceno,
+        invoice.invoiceno,
         item.description,
         item.quantity,
         item.rate,
@@ -235,7 +235,7 @@ async function addInvoice(invoiceDetails) {
     }
 
     await client.query('COMMIT');
-    return { success: true, invoiceno };
+    return { success: true, invoice };
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error inserting data:', error);

@@ -130,12 +130,12 @@ function convertAmountToWords(amount) {
               <div className="client_info">
                 <div className="left">
                 <h2 className='client_name'>{invoice.clientname}</h2>
-                <p className='address'>{invoice.bankbranch}</p>
+                <p className='address'>{invoice.address}</p>
                 <p className='gstin'>GSTIN: {invoice.gstin}</p>
                 <p className='state'>State Name: Maharashtra, Code: 27</p>
                 </div>
                 <div className="right">
-                  <p className='remark'>"P.0.12345678987</p>
+                  <p className='remark'>{invoice.remark}</p>
                 </div>
               </div>
               <div className="particulars">

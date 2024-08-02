@@ -1,6 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('node:path');
-const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList } = require('./server.js');
+const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList, addInvoice } = require('./server.js');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -37,6 +37,7 @@ const createWindow = () => {
   //   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
   // });
 
+
 };
 
 // This method will be called when Electron has finished
@@ -65,6 +66,18 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+ipcMain.handle('showDialog', async (event, options) => {
+  const result = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      buttons: ['Cancel', 'Yes'],
+      defaultId: 1,
+      title: 'Confirmation',
+      message: options.message,
+      detail: options.detail || '',
+  });
+  return result.response; // Will be 0 for 'Cancel' and 1 for 'Yes'
+});
 
 
 ipcMain.handle('fetchClients', async () => {
@@ -101,6 +114,9 @@ ipcMain.handle('getInvoiceDetails', async () => {
 })
 ipcMain.handle('getAddressList', async (event, id) => {
   return await getAddressList(id);
+})
+ipcMain.handle('addInvoice', async (event, invoiceDetails) => {
+  return await addInvoice(invoiceDetails);
 })
 
 // Handle print request
