@@ -5,9 +5,8 @@ import html2canvas from 'html2canvas';
 
 function InvoicePdf({invoice, setInvoice}) {
 
-    console.log(invoice, 'invoice from pdf');
     const [particulars, setParticulars] = useState([])
-    const blankRows = new Array(30).fill(null);
+    const blankRows = new Array(20).fill(null);
 
     const generateReceipt = () => {
 
@@ -154,7 +153,7 @@ function convertAmountToWords(amount) {
                   {particulars.map((item, index) => (
                     <tr key={index}>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{index + 1}</td>
-                      <td className='table-data' style={{textAlign: 'left'}}>{item.particulars}</td>
+                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5'}}>{item.particulars}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{invoice.sacforclient}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.quantity}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.rate}</td>

@@ -130,6 +130,7 @@ function InvoiceRegister() {
       toast.error('Please fill rate and quantity')
       return
     }
+    console.log(perticular, 'perticular');
     const updatePerticular = {
       ...perticular,
       cgst: ((Number(perticular.quantity) * Number(perticular.rate)) * 9) / 100,
@@ -239,7 +240,7 @@ function InvoiceRegister() {
 
   useEffect(() => {
     getInvoiceDetails()
-  },[])
+  },[invoice])
   return (
     <div className='invoice_container'>
       <h3 className='back-btn' onClick={goBack}>{"< Home"}</h3>
@@ -291,7 +292,7 @@ function InvoiceRegister() {
           <div className="add_particular">
             <div>
                 <label htmlFor="particulars">Particulars</label>
-                <textarea name="description" id="description" cols="20" rows="3" value={perticular.description} onChange={e=>handleChangePerticular(e)}></textarea>
+                <textarea name="description" id="description" cols="20" rows="3"   value={perticular.description} onChange={e=>handleChangePerticular(e)}></textarea>
             </div>
             <div>
                 <label htmlFor="quantity">Quantity</label>
@@ -322,7 +323,7 @@ function InvoiceRegister() {
               <tbody>
                 {invoiceDetail.perticulars.length > 0 && invoiceDetail.perticulars.map((item,index)=>(
                   <tr key={index}>
-                    <td>{item.description}</td>
+                    <td  style={{whiteSpace:'pre-wrap', lineHeight:'1.5'}}>{item.description}</td>
                     <td>{item.quantity}</td>
                     <td>{item.rate}</td>
                     <td>{item.subtotal}</td>
