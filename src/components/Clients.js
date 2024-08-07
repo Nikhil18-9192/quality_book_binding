@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AddClients from './AddClients.js';
+import ViewClient from './ViewClient.js';
+import AddClientModal from './AddClientModal.js';
 
 function Clients() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const [add, setAdd] = useState(false)
+  const [view, setView] = useState(false)
   const [clients, setClients] = useState([]);
-  const [client, setClient]= useState({})
+  const [client, setClient]= useState({
+    clientname:'',
+    bankname:'',
+    bankifsc:'',
+    bankaccountnumber:'',
+    bankbranch:'',
+    clientgstin:'',
+    sacforclient:998912
+  })
 
   const fetchClients = async () => {
     try {
@@ -22,7 +32,7 @@ function Clients() {
     try {
         const result = await window.electronAPI.getClient(id);
         setClient(result)
-        setAdd(true)
+        setView(true)
     } catch (error) {
         console.log('Error querying database:', error)
         throw error
@@ -31,6 +41,9 @@ function Clients() {
 
   const goBack = () => {
     navigate(-1)
+  }
+  const handleChange = (e) => {
+    setClient({...client, [e.target.name]: e.target.value})
   }
 
   useEffect(() => {
@@ -42,7 +55,10 @@ function Clients() {
       <h1 className='page_title'>Clients</h1>
       <div className="filter_container">
         <input type="text" placeholder="Search Bank Name..." className="search_input" onChange={(e) => setQuery(e.target.value)} />
-        <button className="btn" onClick={() => setAdd(true)}>Add Client</button>
+        <button className="btn" onClick={() => {
+          setClient({})
+          setAdd(true)
+        }}>Add Client</button>
       </div>
       <div className="clients_list">
         <table className='table'>
@@ -62,7 +78,7 @@ function Clients() {
             {clients.filter((client) => client.clientname.toLowerCase().includes(query) || client.clientname.toUpperCase().includes(query)).map((client) => (
               <tr key={client.clientid}>
                 <td className='table_data'>{client.clientid}</td>
-                <td className='table_data'>{client.clientname}</td>
+                <td className='table_data' style={{textAlign:'left'}}>{client.clientname}</td>
                 <td className='table_data'>{client.bankname}</td>
                 <td className='table_data'>{client.bankifsc}</td>
                 <td className='table_data'>{client.bankbranch}</td>
@@ -74,7 +90,8 @@ function Clients() {
           </tbody>
         </table>
       </div>
-      {add && <AddClients clients={clients} setClients={setClients} setAdd={setAdd} client={client} setClient={setClient} />}
+      {view && <ViewClient   client={client} setView={setView} setClient={setClient} />}
+      {add && <AddClientModal client={client} isUpdate={false}  setClose={setAdd}  />}
     </div>
   );
 }

@@ -10,12 +10,14 @@ async function getClients() {
   }
 }
 
-async function getClientAddress() {
+async function getClientAddress(clientid) {
   try {
-    const result = await pool.query('SELECT * FROM clientaddress');
+    const query = 'SELECT * FROM clientaddress WHERE clientid = $1';
+    const values = [clientid];
+    const result = await pool.query(query, values);
     return result.rows;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error fetching client address:', error);
     throw error;
   }
 }
@@ -67,12 +69,12 @@ async function getInvoiceReg(pageNumber) {
 
 async function addClients(clientInfo) {
   try {
-    const { clientName, bankName, ifsc, accountNo, branchName, gstin, sac } = clientInfo;
+    const { clientname, bankname, bankifsc, bankaccountnumber, bankbranch, clientgstin, sacforclient } = clientInfo;
     const query = `
       INSERT INTO clients (clientname, bankname, bankifsc, bankaccountnumber, bankbranch, clientgstin, sacforclient)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *`;
-    const values = [clientName, bankName, ifsc, accountNo, branchName, gstin, sac];
+    const values = [clientname, bankname, bankifsc, bankaccountnumber, bankbranch, clientgstin, sacforclient];
     const result = await pool.query(query, values);
     return result.rows;
   } catch (error) {
@@ -80,6 +82,30 @@ async function addClients(clientInfo) {
     throw error;
   }
 }
+
+async function updateClient(clientId, clientInfo) {
+  try {
+    const { clientname, bankname, bankifsc, bankaccountnumber, bankbranch, clientgstin, sacforclient , clientid} = clientInfo;
+    const query = `
+      UPDATE clients
+      SET clientname = $1,
+          bankname = $2,
+          bankifsc = $3,
+          bankaccountnumber = $4,
+          bankbranch = $5,
+          clientgstin = $6,
+          sacforclient = $7
+      WHERE clientid = $8
+      RETURNING *`;
+    const values = [clientname, bankname, bankifsc, bankaccountnumber, bankbranch, clientgstin, sacforclient, clientid];
+    const result = await pool.query(query, values);
+    return result.rows;
+  } catch (error) {
+    console.error('Error updating client:', error);
+    throw error;
+  }
+}
+
 
 async function getClient(id) {
   try {
@@ -125,7 +151,7 @@ async function getInvoicesByDateRange(dateFrom, dateTo, pageNumber) {
     const countQuery = 'SELECT COUNT(*) FROM invoicedb WHERE date BETWEEN $1 AND $2';
     const countResult = await pool.query(countQuery, [dateFrom, dateTo]);
     const totalRows = parseInt(countResult.rows[0].count, 10);
-
+    const allData = await pool.query('SELECT * FROM invoicedb WHERE date BETWEEN $1 AND $2',[dateFrom, dateTo]);
     // Calculate the total number of pages
     const totalPages = Math.ceil(totalRows / pageSize);
 
@@ -135,7 +161,8 @@ async function getInvoicesByDateRange(dateFrom, dateTo, pageNumber) {
 
     return {
       totalPages: totalPages,
-      data: result.rows
+      data: result.rows,
+      allData: allData.rows
     };
   } catch (error) {
     console.error('Error fetching invoices:', error);
@@ -246,4 +273,4 @@ async function addInvoice(invoiceDetails) {
 }
 
 
-module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList, addInvoice };
+module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList, addInvoice, updateClient };

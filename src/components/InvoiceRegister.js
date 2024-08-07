@@ -101,7 +101,6 @@ function InvoiceRegister() {
     const {name, value} = e.target
 
     if(name == 'invoicedate'){
-      console.log(name, value,'test2');
       const newInvoiceNo = getNextInvoiceNumber(lastInvoice, value)
       setINvoiceDetail({
         ...invoiceDetail,
@@ -130,7 +129,6 @@ function InvoiceRegister() {
       toast.error('Please fill rate and quantity')
       return
     }
-    console.log(perticular, 'perticular');
     const updatePerticular = {
       ...perticular,
       cgst: ((Number(perticular.quantity) * Number(perticular.rate)) * 9) / 100,
@@ -189,8 +187,6 @@ function InvoiceRegister() {
       }
 
       const payload = {...invoiceDetail, ...client}
-
-      console.log(payload, 'payload');
       
       try {
         const result = await window.electronAPI.addInvoice(payload);
@@ -227,9 +223,8 @@ function InvoiceRegister() {
             clientgstin:'',
             sacforclient:''
           })
-          console.log(invoice)
+          
           setInvoice(result.invoice)
-          console.log(result.invoice)
         }
         
       } catch (error) {

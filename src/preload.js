@@ -17,9 +17,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
             throw error;
         }
     },
-    fetchClientAddress: async () => {
+    getClientAddress: async (clientid) => {
         try {
-            const result = await ipcRenderer.invoke('fetchClientAddress');
+            const result = await ipcRenderer.invoke('getClientAddress', clientid);
             return result;
         } catch (error) {
             console.error('Error querying database:', error);
@@ -48,6 +48,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     addClients: async(clientInfo)=>{
         try {
             const result = await ipcRenderer.invoke('addClients', clientInfo);
+            return result;
+        } catch (error) {
+            console.log('Error querying database:', error)
+            throw error
+        }
+    },
+    updateClient: async(clientid,clientInfo)=>{
+        try {
+            const result = await ipcRenderer.invoke('updateClient', clientid,clientInfo);
             return result;
         } catch (error) {
             console.log('Error querying database:', error)

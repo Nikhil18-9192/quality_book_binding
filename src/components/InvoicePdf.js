@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 function InvoicePdf({invoice, setInvoice}) {
 
     const [particulars, setParticulars] = useState([])
-    const blankRows = new Array(20).fill(null);
+    const [roundValues, setRoundValues] = useState(null)
 
     const generateReceipt = () => {
 
@@ -29,12 +29,36 @@ function InvoicePdf({invoice, setInvoice}) {
       }
 
       const handleClose = ()=>{
+        
         setInvoice(null)
       }
 
+      const roundValue = (value) =>{
+        // Round the value to the nearest integer
+        const roundedValue = Math.round(value);
+    
+        // Calculate the remaining fractional part
+        const remainingFractionalPart = Math.abs(value - roundedValue).toFixed(2);
+        
+        // Determine if the fractional part was added or removed
+        const action = (roundedValue > value) ? 'added' : 'removed';
+    
+        return {
+            roundedValue: roundedValue.toFixed(2),
+            remainingFractionalPart: remainingFractionalPart,
+            action: action
+        };    
+    }
+
       const fetchParticulars = async()=>{
+        const isRoundOff = window.confirm("Do you want to Round Off Total?")
+        if(isRoundOff){
+          const round =  roundValue(invoice.total)
+          console.log(round, 'round value')
+          setRoundValues(round)
+          
+        }
         const result = await window.electronAPI.getParticulars(invoice.invoiceno);
-        console.log(result);
         setParticulars(result)
       }
 
@@ -81,13 +105,15 @@ function convertAmountToWords(amount) {
     const fractionalInWords = fractionalPart ? numberToWords(parseInt(fractionalPart)) : '';
 
     let result = `${integerInWords} rupees`;
-    if (fractionalInWords) {
+    if (fractionalInWords && fractionalInWords != 'Zero') {
         result += ` and ${fractionalInWords} paise`;
     }
     result += ' only';
 
     return result;
     }
+
+   
 
 
       useEffect(() => {
@@ -122,7 +148,7 @@ function convertAmountToWords(amount) {
                 </div>
                 <div className="invoice_detail">
                   <p className='tax-btn'>Tax Invoice</p>
-                  <p className='invoice_no' style={{margin:'30px 0'}}>Invoice No: {invoice.invoiceno}</p>
+                  <p className='invoice_no' style={{margin:'58px 0'}}>Invoice No: {invoice.invoiceno}</p>
                   <p className='date'>Date: {invoice.date.toLocaleDateString()}</p>
                 </div>
               </div>
@@ -143,26 +169,26 @@ function convertAmountToWords(amount) {
                   <tr>
                     <th className='table-head' style={{width: '7%'}}>Sr. No.</th>
                     <th className='table-head'>Particulars</th>
-                    <th className='table-head' style={{width: '7%'}}>SAC/HSN</th>
-                    <th className='table-head' style={{width: '7%'}}>Quantity</th>
-                    <th className='table-head' style={{width: '7%'}}>Rate</th>
-                    <th className='table-head' style={{width: '10%'}}>Amount</th>
+                    <th className='table-head' style={{width: '12%'}}>SAC/HSN</th>
+                    <th className='table-head' style={{width: '10%'}}>Quantity</th>
+                    <th className='table-head' style={{width: '12%'}}>Rate</th>
+                    <th className='table-head' style={{width: '12%'}}>Amount</th>
                   </tr>
                   </thead>
                   <tbody>
                   {particulars.map((item, index) => (
                     <tr key={index}>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{index + 1}</td>
-                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5'}}>{item.particulars}</td>
+                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5', fontWeight:'600'}}>{item.particulars}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{invoice.sacforclient}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.quantity}</td>
-                      <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.rate}</td>
+                      <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{parseFloat(item.rate).toFixed(2)}</td>
                       <td className='table-data' style={{width: '10%', textAlign: 'center'}}>{item.rowsubtotal}</td>
                     </tr>
                   ))}
                   {/* Render four blank rows */}
-                  {blankRows.map((_, index) => (
-                    <tr key={`blank-${index}`}>
+                  {new Array((particulars.length  > 7 ? particulars.length + 2: 7) - (particulars.length)).fill(null).map((_, index) => (
+                    <tr key={`blank-${index}`} style={{height: '94px'}}>
                       <td className='table-data' style={{width: '7%'}}></td>
                       <td className='table-data' ></td>
                       <td className='table-data' style={{width: '7%', }} ></td>
@@ -198,16 +224,25 @@ function convertAmountToWords(amount) {
                                 
                                 
                               </tr>
+                              {roundValues !== null && 
                               <tr>
-                                <td  className='td'>Round Off :</td>
-                                
-                                
-                              </tr>
+                              <td  className='td'>Round Off :</td>
+                              
+                              
+                            </tr>
+                              }
+                              
                               <tr>
                                 <td className='td' style={{border: 'none'}} >Grand Total :</td>
                                 
                                 
                               </tr>
+                              {
+                                roundValues === null &&
+                                <tr>
+                                  <td className='td' style={{border: 'none'}} ></td>
+                                </tr>
+                              }
                           </tbody>
                         </table>
                       </td>
@@ -227,16 +262,21 @@ function convertAmountToWords(amount) {
                                 
                                 
                               </tr>
+                              {roundValues !== null &&
                               <tr>
-                                <td  className='td'>₹ {(invoice.total - Math.floor(invoice.total)).toFixed(2)}</td>
+                              <td  className='td'>₹ {roundValues.action === 'removed'? '-' : ''}{' '}{roundValues.remainingFractionalPart}</td>
+                            </tr>
+                              }
+                              <tr>
+                                <td className='td' style={{border: 'none'}} >₹ {roundValues !== null ? roundValues.roundedValue: invoice.total}</td>
                                 
                                 
                               </tr>
+                              {roundValues === null && 
                               <tr>
-                                <td className='td' style={{border: 'none'}} >₹ {invoice.total}</td>
-                                
-                                
+                                <td className='td' style={{border: 'none'}} ></td>
                               </tr>
+                              }
                           </tbody>
                         </table>
                       </td>
