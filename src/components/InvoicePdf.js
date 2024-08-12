@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import {jsPDF} from 'jspdf'
 import { IoCloseSharp } from "react-icons/io5";
 import html2canvas from 'html2canvas';
+import ConfirmModal from './ConfirmModal';
+import {createRoot} from 'react-dom/client';
 
 function InvoicePdf({invoice, setInvoice}) {
 
@@ -50,17 +52,53 @@ function InvoicePdf({invoice, setInvoice}) {
         };    
     }
 
+    function showConfirmModal(message) {
+      
+      return new Promise((resolve, reject) => {
+        const modalRoot = document.createElement('div');
+        const root = createRoot(modalRoot)
+        document.body.appendChild(modalRoot);
+    
+        const handleConfirm = () => {
+          cleanup();
+          resolve(true);
+        };
+    
+        const handleCancel = () => {
+          cleanup();
+          resolve(false);
+        };
+    
+        const cleanup = () => {
+          root.unmount();
+          document.body.removeChild(modalRoot);
+        };
+    
+        root.render(
+          <ConfirmModal
+            message={message}
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+          />
+        );
+      });
+    }
+
       const fetchParticulars = async()=>{
-        const isRoundOff = window.confirm("Do you want to Round Off Total?")
-        if(isRoundOff){
-          const round =  roundValue(invoice.total)
-          console.log(round, 'round value')
-          setRoundValues(round)
+        const [integerPart, fractionalPart] = invoice.total.toString().split('.');
+        if(fractionalPart !== '00'){
+          const isRoundOff = await showConfirmModal('Do you want to round off the amount?')
+            if(isRoundOff){
+              const round =  roundValue(invoice.total)
+              setRoundValues(round)
+              
+            }
+          }
+            const result = await window.electronAPI.getParticulars(invoice.invoiceno);
+            setParticulars(result)
           
         }
-        const result = await window.electronAPI.getParticulars(invoice.invoiceno);
-        setParticulars(result)
-      }
+        
 
       function numberToWords(num) {
         if (num === 0) return 'Zero';
@@ -179,7 +217,7 @@ function convertAmountToWords(amount) {
                   {particulars.map((item, index) => (
                     <tr key={index}>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{index + 1}</td>
-                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5', fontWeight:'600'}}>{item.particulars}</td>
+                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5'}}>{item.particulars}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{invoice.sacforclient}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.quantity}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{parseFloat(item.rate).toFixed(2)}</td>
@@ -212,35 +250,35 @@ function convertAmountToWords(amount) {
                         <table className="nested_table">
                           <tbody>
                               <tr >
-                                <td className='td' >Total :</td>
+                                <td className='td'  style={{fontWeight: 'bold'}}>Total :</td>
                               </tr>
                               <tr>
-                                <td  className='td'>CGST 9% :</td>
+                                <td  className='td' style={{fontWeight: 'bold'}}>CGST 9% :</td>
                                 
                                 
                               </tr>
                               <tr>
-                                <td  className='td' >SGST 9% :</td>
+                                <td  className='td' style={{fontWeight: 'bold'}} >SGST 9% :</td>
                                 
                                 
                               </tr>
                               {roundValues !== null && 
                               <tr>
-                              <td  className='td'>Round Off :</td>
+                              <td  className='td' style={{fontWeight: 'bold'}}>Round Off :</td>
                               
                               
                             </tr>
                               }
                               
                               <tr>
-                                <td className='td' style={{border: 'none'}} >Grand Total :</td>
+                                <td className='td' style={{border: 'none', fontWeight: 'bold'}} >Grand Total :</td>
                                 
                                 
                               </tr>
                               {
                                 roundValues === null &&
                                 <tr>
-                                  <td className='td' style={{border: 'none'}} ></td>
+                                  <td className='td' style={{border: 'none', fontWeight: 'bold'}} ></td>
                                 </tr>
                               }
                           </tbody>
@@ -285,7 +323,7 @@ function convertAmountToWords(amount) {
                 </table> 
 
               </div>
-              <p className='rupee_in_words'>Rupees In Words: <span> {convertAmountToWords(invoice.total)}</span></p>
+              <p className='rupee_in_words'>Rupees In Words: <span> {convertAmountToWords(roundValues !== null ? roundValues.roundedValue: invoice.total)}</span></p>
               <div className="footer">
                 <div className="declaration">
                   <p className='info_title'>Declaration:</p>

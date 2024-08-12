@@ -273,4 +273,54 @@ async function addInvoice(invoiceDetails) {
 }
 
 
-module.exports = { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList, addInvoice, updateClient };
+async function addAddress(clientid, clientname, address) {
+  try {
+    const query = `
+      INSERT INTO clientaddress (clientid, address, clientname)
+      VALUES ($1, $2, $3)
+      RETURNING *`;
+    const values = [clientid, address, clientname];
+    const result = await pool.query(query, values);
+    return result.rows;
+  } catch (error) {
+    console.error('Error adding address:', error);
+    throw error;
+  }
+}
+
+async function deleteAddress(srno) {
+  try {
+    const query = `
+      DELETE FROM clientaddress
+      WHERE srno = $1
+      RETURNING *`;
+    const values = [srno];
+    const result = await pool.query(query, values);
+    return result.rows;
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    throw error;
+  }
+}
+
+async function deleteInvoice(invoiceId) {
+  
+  try {
+    // Delete from invoicemaster (invoice items)
+    const deleteItemsQuery = 'DELETE FROM invoicemaster WHERE invoiceno = $1';
+    await pool.query(deleteItemsQuery, [invoiceId]);
+
+    // Delete from invoiceDB (invoice)
+    const deleteInvoiceQuery = 'DELETE FROM invoicedb WHERE invoiceno = $1';
+    const result = await pool.query(deleteInvoiceQuery, [invoiceId]);
+    return result.rows;
+
+  } catch (error) {
+    console.error('Error deleting invoice:', error);
+    throw error;
+  }
+}
+
+
+
+module.exports = { getClients,deleteInvoice, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars,getInvoiceDetails,getAddressList, addInvoice, updateClient, addAddress, deleteAddress };

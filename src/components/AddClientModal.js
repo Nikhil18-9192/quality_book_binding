@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, {  useState } from 'react'
 import { IoCloseSharp } from "react-icons/io5";
 
-function AddClientModal({client, isUpdate, setClose}) { 
+function AddClientModal({client, setClose}) { 
     const [formData, setFormData] = useState({
         clientname: client.clientname ? client.clientname : '',
         clientid: client.clientid ? client.clientid : '',
@@ -20,20 +20,16 @@ function AddClientModal({client, isUpdate, setClose}) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         let result = null
-        console.log(formData)
     
-        if(isUpdate){
-            result = await window.electronAPI.updateClient(client.clientid, formData)
-        }else{
-            result = await window.electronAPI.addClients(formData)
-        }
+        result = await window.electronAPI.addClients(formData)
+
         setClose(false)
     }
 
   return (
     <div className='addclient'>
     <div className="add_modal_content">
-            <h1 className='modal_title'>{isUpdate ? 'Update': 'Add'} Client</h1>
+            <h1 className='modal_title'>{ 'Add'} Client</h1>
             <IoCloseSharp className='close' onClick={() => setClose(false)} />
             <form className='form' onSubmit={(e)=> handleSubmit(e)}>
                 <div className='form_item'>
@@ -70,7 +66,7 @@ function AddClientModal({client, isUpdate, setClose}) {
                     e.preventDefault()
                     setClose(false)
                 }}>Cancel</button>
-                <button className="submit">{isUpdate ? 'Update' : 'Add'}</button>
+                <button className="submit">{'Add'}</button>
             </div>
             </form>
                 

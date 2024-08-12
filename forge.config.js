@@ -1,6 +1,7 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
+
 module.exports = {
   packagerConfig: {
     asar: true,
@@ -12,7 +13,8 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       config: {
         authors: 'Nikhil Korane',
-        description: 'An Qaulity Book Binding Electron app'
+        description: 'An Qaulity Book Binding Electron app',
+        icon:'./src/assets/icon.ico',
       },
     },
     {
@@ -21,7 +23,9 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        icon: './src/assets/icon.png'
+      },
     },
     {
       name: '@electron-forge/maker-rpm',

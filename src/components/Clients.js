@@ -40,6 +40,10 @@ function Clients() {
   }
 
   const goBack = () => {
+    if(view){
+      setView(false)
+      return
+    }
     navigate(-1)
   }
   const handleChange = (e) => {
@@ -51,16 +55,19 @@ function Clients() {
   },[clients])
   return (
     <div className='clients'>
-      <h3 className='back-btn' onClick={goBack}>{"< Home"}</h3>
+      <h3 className='back-btn' onClick={goBack}>{!view ? "< Home" : "< Back"}</h3>
       <h1 className='page_title'>Clients</h1>
-      <div className="filter_container">
+      {!view && 
+        <div className="filter_container">
         <input type="text" placeholder="Search Bank Name..." className="search_input" onChange={(e) => setQuery(e.target.value)} />
         <button className="btn" onClick={() => {
           setClient({})
           setAdd(true)
         }}>Add Client</button>
       </div>
-      <div className="clients_list">
+      }
+      {!view ?(
+        <div className="clients_list">
         <table className='table'>
           <thead>
             <tr>
@@ -90,8 +97,10 @@ function Clients() {
           </tbody>
         </table>
       </div>
-      {view && <ViewClient   client={client} setView={setView} setClient={setClient} />}
-      {add && <AddClientModal client={client} isUpdate={false}  setClose={setAdd}  />}
+      ):(
+        <ViewClient   client={client} />
+      )}
+      {add && <AddClientModal client={client}  setClose={setAdd}  />}
     </div>
   );
 }

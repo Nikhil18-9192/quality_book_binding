@@ -6,6 +6,7 @@ import Clients from './components/Clients.js';
 import Invoices from './components/Invoices.js';
 import GstSummery from './components/GstSummery.js';
 import InvoiceRegister from './components/InvoiceRegister.js';
+import ViewClient from './components/ViewClient.js';
 function App() {
   const basePath = window.location.pathname.startsWith('/main_window') ? '/main_window' : '/';
   

@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineClear } from "react-icons/ai";
 import InvoicePdf from './InvoicePdf.js';
+import { toast } from 'react-toastify';
+import ConfirmModal from './ConfirmModal.js';
+import "react-toastify/dist/ReactToastify.css";
+import {createRoot} from 'react-dom/client';
 // import InvoicePdf from './InvoicePdf';
 
 function Invoices() {
@@ -47,6 +51,50 @@ function Invoices() {
         console.log('Error querying database:', error)
         throw error
     }
+  }
+  function showConfirmModal(message) {
+      
+    return new Promise((resolve, reject) => {
+      const modalRoot = document.createElement('div');
+      const root = createRoot(modalRoot)
+      document.body.appendChild(modalRoot);
+  
+      const handleConfirm = () => {
+        cleanup();
+        resolve(true);
+      };
+  
+      const handleCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+  
+      const cleanup = () => {
+        root.unmount();
+        document.body.removeChild(modalRoot);
+      };
+  
+      root.render(
+        <ConfirmModal
+          message={message}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      );
+    });
+  }
+
+  const handleDelete = async(invoice)=>{
+    try {
+      const Confirmation = await showConfirmModal("Are you sure you want to delete this invoice?")
+      if(!Confirmation) return
+      await window.electronAPI.deleteInvoice(invoice.invoiceno)
+      setInvoiceReg(invoiceReg.filter((i)=> i.invoiceno != invoice.invoiceno))
+      toast.success('Invoice deleted successfully')
+    } catch (error) {
+      toast.error(error.message)
+    }
+  
   }
 
   const prev = ()=>{
@@ -144,19 +192,21 @@ function Invoices() {
               <th className='table_head'>SGST</th>
               <th className='table_head'>Sub Total</th>
               <th className='table_head'>Total</th>
-              <th className='table_head'>Action</th>
+              <th className='table_head'>Delete</th>
+              <th className='table_head'>View</th>
             </tr>
           </thead>
           <tbody>
             {invoiceReg.map((invoice, i) => (
               <tr key={i}>
                 <td className='table_data'>{invoice.invoiceno}</td>
-                <td className='table_data'>{invoice.clientname}</td>
+                <td className='table_data' style={{textAlign:'left'}}>{invoice.clientname}</td>
                 <td className='table_data'>{invoice.bankbranch}</td>
                 <td className='table_data'>{invoice.cgst}</td>
                 <td className='table_data'>{invoice.sgst}</td>
                 <td className='table_data'>{invoice.subtotal}</td>
                 <td className='table_data'>{invoice.total}</td>
+                <td className='table_data' style={{cursor: 'pointer', color:'#900'}} onClick={()=>handleDelete(invoice)}>Delete</td>
                 <td className='table_data' style={{cursor: 'pointer', color:'#900'}} onClick={()=>handleView(invoice)}>View</td>
               </tr>
             ))}

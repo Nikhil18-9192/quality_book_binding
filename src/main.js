@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('node:path');
-const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList, addInvoice, updateClient } = require('./server.js');
+const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList, addInvoice, updateClient, addAddress, deleteAddress,deleteInvoice } = require('./server.js');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -120,6 +120,15 @@ ipcMain.handle('getAddressList', async (event, id) => {
 })
 ipcMain.handle('addInvoice', async (event, invoiceDetails) => {
   return await addInvoice(invoiceDetails);
+})
+ipcMain.handle('addAddress', async (event, clientid, clientname, address) => {
+  return await addAddress(clientid, clientname, address);
+})
+ipcMain.handle('deleteAddress', async (event, id) => {
+  return await deleteAddress(id);
+})
+ipcMain.handle('deleteInvoice', async (event, id) => {
+  return await deleteInvoice(id);
 })
 
 // Handle print request

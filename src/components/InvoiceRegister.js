@@ -180,12 +180,6 @@ function InvoiceRegister() {
         return
       }
 
-      const confirm = window.confirm('Do you want to round of total?')
-
-      if(confirm){
-        invoiceDetail.total = Math.round(invoiceDetail.total).toFixed(2)
-      }
-
       const payload = {...invoiceDetail, ...client}
       
       try {
@@ -291,11 +285,11 @@ function InvoiceRegister() {
             </div>
             <div>
                 <label htmlFor="quantity">Quantity</label>
-                <input type="text" name="quantity" id="quantity" placeholder='30' value={perticular.quantity} onChange={e=>handleChangePerticular(e)} />
+                <input type="text" name="quantity" id="quantity"  value={perticular.quantity} onChange={e=>handleChangePerticular(e)} />
             </div>
             <div>
                 <label htmlFor="rate">Rate</label>
-                <input type="text" name="rate" id="rate" value={perticular.rate} placeholder='60' onChange={e=>handleChangePerticular(e)} />
+                <input type="text" name="rate" id="rate" value={perticular.rate}  onChange={e=>handleChangePerticular(e)} />
             </div>
             <div>
               <button className='add_btn' onClick={addPerticular}>Add</button>
