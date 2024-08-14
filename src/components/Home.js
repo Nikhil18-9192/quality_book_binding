@@ -9,6 +9,8 @@ function Home() {
     const basePath = window.location.pathname
   return (
     <div className='home'>
+      <h1 className='title'>Quality Book Binding</h1>
+    <div className='nav'>
       <Link to="/clients" className='nav-link'>
         <FaUsers className='nav-icon' />Clients
         </Link>
@@ -21,6 +23,7 @@ function Home() {
       <Link to="/invoiceRegister" className='nav-link'>
       <GrDatabase className='nav-icon' />Create Invoice
       </Link>
+    </div>
     </div>
   )
 }
