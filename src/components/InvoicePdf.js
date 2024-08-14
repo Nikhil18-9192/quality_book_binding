@@ -216,7 +216,7 @@ function convertAmountToWords(amount) {
                   <tbody>
                   {particulars.map((item, index) => (
                     <tr key={index}>
-                      <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{index + 1}</td>
+                      <td className='table-data' style={{width: '8%', textAlign: 'center'}}>{index + 1}</td>
                       <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5'}}>{item.particulars}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{invoice.sacforclient}</td>
                       <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.quantity}</td>
@@ -225,8 +225,8 @@ function convertAmountToWords(amount) {
                     </tr>
                   ))}
                   {/* Render four blank rows */}
-                  {new Array((particulars.length  > 7 ? particulars.length + 2: 7) - (particulars.length)).fill(null).map((_, index) => (
-                    <tr key={`blank-${index}`} style={{height: '94px'}}>
+                  {new Array((particulars.length  > 5 ? particulars.length + 2 : 5) - (particulars.length)).fill(null).map((_, index) => (
+                    <tr key={`blank-${index}`} style={{height: '85px'}}>
                       <td className='table-data' style={{width: '7%'}}></td>
                       <td className='table-data' ></td>
                       <td className='table-data' style={{width: '7%', }} ></td>

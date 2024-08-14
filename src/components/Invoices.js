@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineClear } from "react-icons/ai";
 import InvoicePdf from './InvoicePdf.js';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import ConfirmModal from './ConfirmModal.js';
 import "react-toastify/dist/ReactToastify.css";
 import {createRoot} from 'react-dom/client';
@@ -157,6 +157,7 @@ function Invoices() {
   },[])
   return (
     <div className='clients'>
+      <ToastContainer />
       <h3 className='back-btn' onClick={goBack}>{"< Home"}</h3>
       <h1 className='page_title'>Invoice Register</h1>
       <div className="filter_container">

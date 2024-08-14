@@ -14,7 +14,7 @@ module.exports = {
       config: {
         authors: 'Nikhil Korane',
         description: 'An Qaulity Book Binding Electron app',
-        icon:'./src/assets/icon.ico',
+        icon:'./src/assets/icon.png',
       },
     },
     {
