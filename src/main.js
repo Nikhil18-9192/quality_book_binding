@@ -134,7 +134,8 @@ ipcMain.handle('deleteInvoice', async (event, id) => {
 // Handle print request
 ipcMain.on('print-invoice', (event) => {
   const focusedWindow = BrowserWindow.getFocusedWindow();
-    focusedWindow.webContents.print({ silent: false, printBackground: true }, (success, errorType) => {
-        if (!success) console.log(errorType);
+    focusedWindow.webContents.print({ silent: true, printBackground: true }, (success, errorType) => {
+      if (!success) console.log(errorType, 'print error');
     });
 });
+

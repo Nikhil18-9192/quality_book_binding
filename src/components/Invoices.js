@@ -194,7 +194,7 @@ function Invoices() {
               <th className='table_head'>Sub Total</th>
               <th className='table_head'>Total</th>
               <th className='table_head'>Delete</th>
-              <th className='table_head'>View</th>
+              <th className='table_head'>Print/Save</th>
             </tr>
           </thead>
           <tbody>
@@ -208,7 +208,7 @@ function Invoices() {
                 <td className='table_data'>{invoice.subtotal}</td>
                 <td className='table_data'>{invoice.total}</td>
                 <td className='table_data' style={{cursor: 'pointer', color:'#900'}} onClick={()=>handleDelete(invoice)}>Delete</td>
-                <td className='table_data' style={{cursor: 'pointer', color:'#900'}} onClick={()=>handleView(invoice)}>View</td>
+                <td className='table_data' style={{cursor: 'pointer', color:'#900'}} onClick={()=>handleView(invoice)}>Print/Save</td>
               </tr>
             ))}
           </tbody>

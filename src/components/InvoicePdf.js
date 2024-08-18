@@ -4,6 +4,8 @@ import { IoCloseSharp } from "react-icons/io5";
 import html2canvas from 'html2canvas';
 import ConfirmModal from './ConfirmModal';
 import {createRoot} from 'react-dom/client';
+import books from '../assets/book.png';
+import quality from '../assets/logo.JPG';
 
 function InvoicePdf({invoice, setInvoice}) {
 
@@ -84,19 +86,60 @@ function InvoicePdf({invoice, setInvoice}) {
       });
     }
 
+
+const print = async () => {
+  fetchParticulars();
+  const [integerPart, fractionalPart] = invoice.total.toString().split('.');
+  if (fractionalPart !== '00') {
+    const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
+    if (isRoundOff) {
+      const round = roundValue(invoice.total);
+      console.log(round,'test')
+      setRoundValues(round);
+    }
+  }
+
+  const printWindow = window.open('', '', 'width=1600,height=1000');
+  const printContent = document.getElementById('generatePdf').outerHTML;
+
+  // Clone styles
+  const styleSheets = Array.from(document.styleSheets).reduce((styles, styleSheet) => {
+    try {
+      if (styleSheet.cssRules) {
+        const cssRules = Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('\n');
+        return styles + cssRules;
+      }
+    } catch (e) {
+      console.warn('Could not load stylesheet:', styleSheet.href);
+    }
+    return styles;
+  }, '');
+
+  // Write the HTML structure for printing
+  printWindow.document.write(`
+    <html>
+      <head>
+        <style>${styleSheets}</style>
+      </head>
+      <body>${printContent}</body>
+    </html>
+  `);
+  
+  printWindow.document.close();
+  
+  // Give some time for the new window to load before printing
+  printWindow.onload = window.electronAPI.print('print-invoice', `Invoice-${invoice.invoiceno}.pdf`);
+  // generateReceipt()
+  // printWindow.close();
+  // setInvoice(null)
+  
+};
+
+
       const fetchParticulars = async()=>{
-        const [integerPart, fractionalPart] = invoice.total.toString().split('.');
-        if(fractionalPart !== '00'){
-          const isRoundOff = await showConfirmModal('Do you want to round off the amount?')
-            if(isRoundOff){
-              const round =  roundValue(invoice.total)
-              setRoundValues(round)
-              
-            }
-          }
             const result = await window.electronAPI.getParticulars(invoice.invoiceno);
+            console.log(result,'particulars')
             setParticulars(result)
-          
         }
         
 
@@ -155,164 +198,420 @@ function convertAmountToWords(amount) {
 
 
       useEffect(() => {
-        fetchParticulars()
+        // fetchParticulars()
+        print()
       },[])
   return (
     <div className='addclient'>
         <div className='modal_content'>
         <IoCloseSharp className='close' onClick={() => handleClose()} />
-            <div id='generatePdf'>
-              <p className='shree'>|| &#x0936;&#x094D;&#x0930;&#x0940; ||</p>
-              <div className="header">
-                <div className="business_info">
-                  <div className="logo">
-                    <div className="left">
-                      <div className="image"></div>
-                      <p className='log_title'>All King Of Official Book Binding</p>
+            <div id='generatePdf' style={{
+              padding: "14px 24px",
+              boxSizing: "border-box",
+              width: "100%",
+              height: "100%",
+              position: "relative",
+              pageBreakAfter: "always"
+            }}>
+              <p className='shree' style={{
+              color: "red",
+              fontSize: "1.875rem",
+              fontWeight: "bold",
+              textAlign: "center",
+              marginBottom: "1rem"
+            }}>|| &#x0936;&#x094D;&#x0930;&#x0940; ||</p>
+              <div className="header" style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
+                <div className="business_info" style={{
+                  position: "relative",
+                  width: "60%",
+                  borderLeft: "1px solid #000",
+                  borderTop: "1px solid #000",
+                  borderBottom: "1px solid #000",
+                  padding: "14px",
+                  boxSizing: "border-box"
+                }}>
+                  <div className="logo" style={{
+                        position: "relative",
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginBottom: "24px"
+                      }}>
+                    <div className="left" style={{
+                      position: "relative",
+                      width: "30%"
+                    }}>
+                      <img src={books} style={{width: "50px", height: "50px", marginBottom:"18px"}} alt="books" />
+                      <p className='log_title' style={{
+                                        fontWeight: "bold",
+                                        fontSize: "18px",
+                                        color: "blueviolet",
+                                        width: "70%",
+                                        textAlign: "center"
+                                      }}>All King Of Official Book Binding</p>
                     </div>
-                    <div className="right">
-                      <p className='quality'>Quality</p>
-                      <p className='binders'>Book Binders</p>
+                    <div className="right" style={{
+                        position: "relative",
+                        width: "70%"
+                      }}>
+                      <img src={quality} style={{width: "350px", height: "90px"}} alt="quality text" />
+                      <p className='binders' style={{
+                          fontSize: "48px",
+                          color: "#0000FF", // Replace with the appropriate hex code for `$theme-blue`
+                          fontWeight: 600,
+                          marginLeft: "79px",
+                          fontFamily: '"Free Sans", sans-serif',
+                          letterSpacing: "2px"
+                        }}>Book Binders</p>
                     </div>
                   </div>
-                  <p className='address'>1226, 'A' Ward, Plot 1/A, Chopade Mala, Laxtirtha Vasahat East, Rankala Parisar Kolhapur, 416010</p>
-                  <div className="contact">
-                    <p>GSTIN: 27AHPPK1838G1ZA</p>
-                    <p>PAN: AHPPK1828G</p>
-                    <p>State Name: Maharashtra, Code: 27</p>
-                    <p>Contact: +91 9421284184, +91 9011636467</p>
-                    <p>Email: eknathkhadye90@gmail.com</p>
+                  <p className='address' style={{
+                    width: "80%",
+                    lineHeight: "1.3",
+                    fontSize: "20px",
+                    paddingBottom: "14px"
+                  }}>1226, 'A' Ward, Plot 1/A, Chopade Mala, Laxtirtha Vasahat East, Rankala Parisar Kolhapur, 416010</p>
+                  <div className="contact" style={{marginTop:"12px"}}>
+                    <p style={{
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                      letterSpacing: "0.5px",
+                      marginBottom: "4px"
+                    }}>GSTIN: 27AHPPK1838G1ZA</p>
+                    <p style={{
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                      letterSpacing: "0.5px",
+                      marginBottom: "4px"
+                    }}>PAN: AHPPK1828G</p>
+                    <p style={{
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                      letterSpacing: "0.5px",
+                      marginBottom: "4px"
+                    }}>State Name: Maharashtra, Code: 27</p>
+                    <p style={{
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                      letterSpacing: "0.5px",
+                      marginBottom: "4px"
+                    }}>Contact: +91 9421284184, +91 9011636467</p>
+                    <p style={{
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                      letterSpacing: "0.5px",
+                      marginBottom: "4px"
+                    }}>Email: eknathkhadye90@gmail.com</p>
                   </div>
                 </div>
-                <div className="invoice_detail">
-                  <p className='tax-btn'>Tax Invoice</p>
-                  <p className='invoice_no' style={{margin:'58px 0'}}>Invoice No: {invoice.invoiceno}</p>
-                  <p className='date'>Date: {invoice.date.toLocaleDateString()}</p>
+                <div className="invoice_detail" style={{
+                  position: "relative",
+                  width: "40%",
+                  border: "1px solid #000",
+                  padding: "14px",
+                  minHeight: "386px"
+                }}>
+                  <p className='tax-btn' style={{
+                    textAlign: "center",
+                    padding: "18px",
+                    background: "#4D4DFF",
+                    color: "#fff",
+                    width: "230px",
+                    margin: "18px auto",
+                    fontWeight: "700",
+                    fontSize: "24px"
+                  }}>Tax Invoice</p>
+                  <p className='invoice_no' style={{margin:'58px 0',
+                            textAlign: "center",
+                            fontSize: "28px",
+                            fontWeight: "bold"
+                          }}>Invoice No: {invoice.invoiceno}</p>
+                  <p className='date' style={{
+                    textAlign: "center",
+                    fontSize: "28px",
+                    fontWeight: "bold",
+                    marginBottom: "18px"
+                  }}>Date: {invoice.date.toLocaleDateString()}</p>
                 </div>
               </div>
-              <div className="client_info">
-                <div className="left">
-                <h2 className='client_name'>{invoice.clientname}</h2>
-                <p className='address'>{invoice.address}</p>
-                <p className='gstin'>GSTIN: {invoice.gstin}</p>
-                <p className='state'>State Name: Maharashtra, Code: 27</p>
+              <div className="client_info" style={{
+                  padding: "18px 14px",
+                  position: "relative",
+                  borderLeft: "1px solid #000",
+                  borderRight: "1px solid #000",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "start"
+                }}>
+                <div className="left" style={{width: "50%"}}>
+                <h2 className='client_name' style={{marginBottom: "12px", fontSize: "24px"}}>{invoice.clientname}</h2>
+                <p className='address' style={{marginBottom: '12px',fontSize: '22px'}}>{invoice.address}</p>
+                <p className='gstin' style={{marginBottom: '12px',fontSize: '22px', fontWeight: 'bold'}}>GSTIN: {invoice.gstin}</p>
+                <p className='state' style={{marginBottom: '12px',fontSize: '22px'}}>State Name: Maharashtra, Code: 27</p>
                 </div>
-                <div className="right">
-                  <p className='remark'>{invoice.remark}</p>
+                <div className="right" style={{width: '50%',textAlign: 'center'}}>
+                  <p className='remark' style={{fontWeight: 'bold',fontSize: '20px'}}>{invoice.remark}</p>
                 </div>
               </div>
-              <div className="particulars">
-                <table className="table">
+              <div className="particulars" style={{width: '100%'}}>
+                <table className="table" style={{
+                  width: "100%",
+                  border: "1px solid #000",
+                  borderCollapse: "collapse"
+                }}>
                   <thead>
                   <tr>
-                    <th className='table-head' style={{width: '7%'}}>Sr. No.</th>
-                    <th className='table-head'>Particulars</th>
-                    <th className='table-head' style={{width: '12%'}}>SAC/HSN</th>
-                    <th className='table-head' style={{width: '10%'}}>Quantity</th>
-                    <th className='table-head' style={{width: '12%'}}>Rate</th>
-                    <th className='table-head' style={{width: '12%'}}>Amount</th>
+                    <th className='table-head' style={{width: '7%',
+                      border: "1px solid #000",
+                      borderCollapse: "collapse",
+                      padding: "10px",
+                      color: "#fff",
+                      textAlign: "center",
+                      background: "#4D4DFF",
+                      fontWeight: "bold",
+                      fontSize: "20px"
+                    }}>Sr. No.</th>
+                    <th className='table-head' style={{
+                      border: "1px solid #000",
+                      borderCollapse: "collapse",
+                      padding: "10px",
+                      color: "#fff",
+                      textAlign: "center",
+                      background: "#4D4DFF",
+                      fontWeight: "bold",
+                      fontSize: "20px"
+                    }}>Particulars</th>
+                    <th className='table-head' style={{width: '12%',
+                      border: "1px solid #000",
+                      borderCollapse: "collapse",
+                      padding: "10px",
+                      color: "#fff",
+                      textAlign: "center",
+                      background: "#4D4DFF",
+                      fontWeight: "bold",
+                      fontSize: "20px"
+                    }}>SAC/HSN</th>
+                    <th className='table-head' style={{width: '10%',
+                      border: "1px solid #000",
+                      borderCollapse: "collapse",
+                      padding: "10px",
+                      color: "#fff",
+                      textAlign: "center",
+                      background: "#4D4DFF",
+                      fontWeight: "bold",
+                      fontSize: "20px"
+                    }}>Quantity</th>
+                    <th className='table-head' style={{width: '12%',
+                      border: "1px solid #000",
+                      borderCollapse: "collapse",
+                      padding: "10px",
+                      color: "#fff",
+                      textAlign: "center",
+                      background: "#4D4DFF",
+                      fontWeight: "bold",
+                      fontSize: "20px"
+                    }}>Rate</th>
+                    <th className='table-head' style={{width: '12%',
+                      border: "1px solid #000",
+                      borderCollapse: "collapse",
+                      padding: "10px",
+                      color: "#fff",
+                      textAlign: "center",
+                      background: "#4D4DFF",
+                      fontWeight: "bold",
+                      fontSize: "20px"
+                    }}>Amount</th>
                   </tr>
                   </thead>
                   <tbody>
                   {particulars.map((item, index) => (
                     <tr key={index}>
-                      <td className='table-data' style={{width: '8%', textAlign: 'center'}}>{index + 1}</td>
-                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5'}}>{item.particulars}</td>
-                      <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{invoice.sacforclient}</td>
-                      <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{item.quantity}</td>
-                      <td className='table-data' style={{width: '7%', textAlign: 'center'}}>{parseFloat(item.rate).toFixed(2)}</td>
-                      <td className='table-data' style={{width: '10%', textAlign: 'center'}}>{item.rowsubtotal}</td>
+                      <td className='table-data' style={{width: '8%', textAlign: 'center',borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"}}>{index + 1}</td>
+                      <td className='table-data ' style={{textAlign: 'left', whiteSpace:'pre-wrap', lineHeight:'1.5',borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"}}>{item.particulars}</td>
+                      <td className='table-data' style={{width: '7%', textAlign: 'center',borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"}}>{invoice.sacforclient}</td>
+                      <td className='table-data' style={{width: '7%', textAlign: 'center',borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"}}>{item.quantity}</td>
+                      <td className='table-data' style={{width: '7%', textAlign: 'center',borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"}}>{parseFloat(item.rate).toFixed(2)}</td>
+                      <td className='table-data' style={{width: '10%', textAlign: 'center',borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"}}>{item.rowsubtotal}</td>
                     </tr>
                   ))}
                   {/* Render four blank rows */}
                   {new Array((particulars.length  > 5 ? particulars.length + 2 : 5) - (particulars.length)).fill(null).map((_, index) => (
                     <tr key={`blank-${index}`} style={{height: '85px'}}>
-                      <td className='table-data' style={{width: '7%'}}></td>
-                      <td className='table-data' ></td>
-                      <td className='table-data' style={{width: '7%', }} ></td>
-                      <td className='table-data' style={{width: '7%', }}></td>
-                      <td className='table-data' style={{width: '7%', }}></td>
-                      <td className='table-data' style={{width: '10%', }}></td>
+                      <td className='table-data' style={{width: '7%',
+                          borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"
+                        }}></td>
+                      <td className='table-data' style={{
+                          borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"
+                        }}></td>
+                      <td className='table-data' style={{width: '7%',
+                          borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"
+                        }}></td>
+                      <td className='table-data' style={{width: '7%',
+                          borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"
+                        }}></td>
+                      <td className='table-data' style={{width: '7%',
+                          borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"
+                        }}></td>
+                      <td className='table-data' style={{width: '10%',
+                          borderRight: "1px solid #000",
+                          padding: "10px",
+                          fontSize: "22px"
+                        }}></td>
                     </tr>
                   ))}
                   {/* Render the row with paragraphs and nested table */}
                     <tr style={{border:'1px solid #000'}}>
                       <td colSpan={3}>
-                        <div className="bank_details">
-                          <p className='info_title'>Bank Account Details:</p>
-                          <p><span>Bank Name: </span>{invoice.bankname}</p>
-                          <p><span>Branch:</span> {invoice.bankbranch}</p>
-                          <p><span>A/c Number:</span> {invoice.bankaccno}</p>
-                          <p><span>IFSC:</span> {invoice.bankifsc}</p>
+                        <div className="bank_details" style={{paddingLeft: "80px"}}>
+                          <p className='info_title' style={{
+                            fontWeight: "bold",
+                            fontSize: "22px",
+                            marginBottom: "24px"
+                          }}>Bank Account Details:</p>
+                          <p style={{fontSize: '22px',marginBottom: '12px'}}><span style={{fontWeight: 'bold'}}>Bank Name: </span>{invoice.bankname}</p>
+                          <p style={{fontSize: '22px',marginBottom: '12px'}}><span style={{fontWeight: 'bold'}}>Branch:</span> {invoice.bankbranch}</p>
+                          <p style={{fontSize: '22px',marginBottom: '12px'}}><span style={{fontWeight: 'bold'}}>A/c Number:</span> {invoice.bankaccno}</p>
+                          <p style={{fontSize: '22px',marginBottom: '12px'}}><span style={{fontWeight: 'bold'}}>IFSC:</span> {invoice.bankifsc}</p>
                         </div>
                       </td>
                       <td colSpan={2} style={{border:'1px solid #000'}}>
-                        <table className="nested_table">
+                        <table className="nested_table" style={{width: '100%'}}>
                           <tbody>
                               <tr >
-                                <td className='td'  style={{fontWeight: 'bold'}}>Total :</td>
+                                <td className='td'  style={{fontWeight: 'bold',
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }}>Total :</td>
                               </tr>
                               <tr>
-                                <td  className='td' style={{fontWeight: 'bold'}}>CGST 9% :</td>
+                                <td  className='td' style={{fontWeight: 'bold',
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }}>CGST 9% :</td>
                                 
                                 
                               </tr>
                               <tr>
-                                <td  className='td' style={{fontWeight: 'bold'}} >SGST 9% :</td>
+                                <td  className='td' style={{fontWeight: 'bold',
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }} >SGST 9% :</td>
                                 
                                 
                               </tr>
                               {roundValues !== null && 
                               <tr>
-                              <td  className='td' style={{fontWeight: 'bold'}}>Round Off :</td>
+                              <td  className='td' style={{fontWeight: 'bold',
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }}>Round Off :</td>
                               
                               
                             </tr>
                               }
                               
                               <tr>
-                                <td className='td' style={{border: 'none', fontWeight: 'bold'}} >Grand Total :</td>
+                                <td className='td' style={{border: 'none', fontWeight: 'bold',
+                                  padding: "10px",
+                                  fontSize: "22px"
+                                }} >Grand Total :</td>
                                 
                                 
                               </tr>
                               {
                                 roundValues === null &&
                                 <tr>
-                                  <td className='td' style={{border: 'none', fontWeight: 'bold'}} ></td>
+                                  <td className='td' style={{border: 'none', fontWeight: 'bold',
+                                  padding: "10px",
+                                  fontSize: "22px"
+                                }} ></td>
                                 </tr>
                               }
                           </tbody>
                         </table>
                       </td>
                       <td colSpan={1} style={{border:'1px solid #000'}}>
-                        <table className="nested_table">
+                        <table className="nested_table" style={{width: '100%'}}>
                           <tbody>
                               <tr >
-                                <td className='td' >₹ {invoice.subtotal}</td>
+                                <td className='td' style={{
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }} >₹ {invoice.subtotal}</td>
                               </tr>
                               <tr>
-                                <td  className='td'>₹ {invoice.cgst}</td>
+                                <td  className='td' style={{
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }}>₹ {invoice.cgst}</td>
                                 
                                 
                               </tr>
                               <tr>
-                                <td  className='td' >₹ {invoice.sgst}</td>
+                                <td  className='td' style={{
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }} >₹ {invoice.sgst}</td>
                                 
                                 
                               </tr>
                               {roundValues !== null &&
                               <tr>
-                              <td  className='td'>₹ {roundValues.action === 'removed'? '-' : ''}{' '}{roundValues.remainingFractionalPart}</td>
+                              <td  className='td' style={{
+                                  padding: "10px",
+                                  borderBottom: "1px solid #000",
+                                  fontSize: "22px"
+                                }}>₹ {roundValues.action === 'removed'? '-' : ''}{' '}{roundValues.remainingFractionalPart}</td>
                             </tr>
                               }
                               <tr>
-                                <td className='td' style={{border: 'none'}} >₹ {roundValues !== null ? roundValues.roundedValue: invoice.total}</td>
+                                <td className='td' style={{border: 'none',
+                                  padding: "10px",
+                                  fontSize: "22px"
+                                }} >₹ {roundValues !== null ? roundValues.roundedValue: invoice.total}</td>
                                 
                                 
                               </tr>
                               {roundValues === null && 
                               <tr>
-                                <td className='td' style={{border: 'none'}} ></td>
+                                <td className='td' style={{border: 'none',
+                                  padding: "10px",
+                                  fontSize: "22px"
+                                }} ></td>
                               </tr>
                               }
                           </tbody>
@@ -323,25 +622,58 @@ function convertAmountToWords(amount) {
                 </table> 
 
               </div>
-              <p className='rupee_in_words'>Rupees In Words: <span> {convertAmountToWords(roundValues !== null ? roundValues.roundedValue: invoice.total)}</span></p>
-              <div className="footer">
-                <div className="declaration">
-                  <p className='info_title'>Declaration:</p>
-                  <p>
+              <p className='rupee_in_words' style={{
+                padding: "14px 14px",
+                fontSize: "24px",
+                borderLeft: "1px solid #000",
+                borderRight: "1px solid #000"
+              }}>Rupees In Words: <span style={{fontWeight: 'bold',fontSize: '22px'}}> {convertAmountToWords(roundValues !== null ? roundValues.roundedValue: invoice.total)}</span></p>
+              <div className="footer" style={{
+                  padding: "16px 16px",
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderBottom: "1px solid #000",
+                  borderLeft: "1px solid #000",
+                  borderRight: "1px solid #000"
+                }}>
+                <div className="declaration" style={{width: '75%'}}>
+                  <p className='info_title' style={{
+                    fontWeight: "bold",
+                    fontSize: "18px",
+                    marginBottom: "4px"
+                  }}>Declaration:</p>
+                  <p style={{fontSize: '16px',width: '75%'}}>
                     "I/We hereby certify that our certification under the Maharashtra Goods and Service Tax Act 2017 and central Goods and Service Act 2017 are in force on which the sale of 
                    goods specified in this tax invoice made by us and that the transaction of sale is coverd by this tax invoice has been effected by us. It shall be accounted for in the turnouver of sales while filling of return and the due tax. If any, Payable on 
                    the sales has been paid of shall be paid"</p>
                 </div>
-                <div className="sign">
-                  <p className='info_title'>Quality Book Binders</p>
-                  <p>Proprietor</p>
+                <div className="sign" style={{
+                    width: "25%",
+                    textAlign: "center",
+                    paddingTop: "14px"
+                  }}>
+                  <p className='info_title' style={{
+                    fontWeight: "bold",
+                    fontSize: "22px",
+                    marginBottom: "64px"
+                  }}>Quality Book Binders</p>
+                  <p style={{fontSize: '20px'}}>Proprietor</p>
               </div>
               </div>
-              <p className='footer_text'>Subject to Kolhapur Jurisdiction</p>
+              <p className='footer_text' style={{
+                width: "100%",
+                textAlign: "center",
+                margin: "16px",
+                fontSize: "20px",
+                fontWeight: "bold",
+                paddingBottom: "16px"
+              }}>Subject to Kolhapur Jurisdiction</p>
             </div>
 
             <div className="btn_container">
-            <button className='btn_primary' onClick={() => printReceipt()}>Print</button>
+            {/* <button className='btn_primary' onClick={() => printReceipt()}>Print</button> */}
             <button className='btn_primary' onClick={() => generateReceipt()}>Download</button>
             <button className='btn_cancel' onClick={() => handleClose()}>Cancel</button>
         </div>
