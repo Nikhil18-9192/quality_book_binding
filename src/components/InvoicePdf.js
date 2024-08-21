@@ -87,14 +87,62 @@ function InvoicePdf({invoice, setInvoice}) {
     }
 
 
+// const print = async () => {
+//   fetchParticulars();
+//   const [integerPart, fractionalPart] = invoice.total.toString().split('.');
+//   if (fractionalPart !== '00') {
+//     const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
+//     if (isRoundOff) {
+//       const round = roundValue(invoice.total);
+//       console.log(round,'test')
+//       setRoundValues(round);
+//     }
+//   }
+
+//   const printWindow = window.open('', '', 'width=1600,height=1000');
+//   const printContent = document.getElementById('generatePdf').outerHTML;
+
+//   // Clone styles
+//   const styleSheets = Array.from(document.styleSheets).reduce((styles, styleSheet) => {
+//     try {
+//       if (styleSheet.cssRules) {
+//         const cssRules = Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('\n');
+//         return styles + cssRules;
+//       }
+//     } catch (e) {
+//       console.warn('Could not load stylesheet:', styleSheet.href);
+//     }
+//     return styles;
+//   }, '');
+
+//   // Write the HTML structure for printing
+//   printWindow.document.write(`
+//     <html>
+//       <head>
+//         <style>${styleSheets}</style>
+//       </head>
+//       <body>${printContent}</body>
+//     </html>
+//   `);
+  
+//   printWindow.document.close();
+  
+//   // Give some time for the new window to load before printing
+//   printWindow.onload = window.electronAPI.print('print-invoice', `Invoice-${invoice.invoiceno}.pdf`);
+//   // generateReceipt()
+//   // printWindow.close();
+//   // setInvoice(null)
+  
+// };
+
 const print = async () => {
   fetchParticulars();
   const [integerPart, fractionalPart] = invoice.total.toString().split('.');
+  
   if (fractionalPart !== '00') {
     const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
     if (isRoundOff) {
       const round = roundValue(invoice.total);
-      console.log(round,'test')
       setRoundValues(round);
     }
   }
@@ -119,20 +167,21 @@ const print = async () => {
   printWindow.document.write(`
     <html>
       <head>
+        <title>Invoice</title>
         <style>${styleSheets}</style>
       </head>
-      <body>${printContent}</body>
+      <body onload="window.focus(); window.print();">
+        ${printContent}
+      </body>
     </html>
   `);
-  
+
   printWindow.document.close();
-  
-  // Give some time for the new window to load before printing
-  printWindow.onload = window.electronAPI.print('print-invoice', `Invoice-${invoice.invoiceno}.pdf`);
-  // generateReceipt()
-  // printWindow.close();
-  // setInvoice(null)
-  
+
+  // Optional: Close the print window after printing
+  // printWindow.onafterprint = () => {
+  //   printWindow.close();
+  // };
 };
 
 
@@ -193,6 +242,14 @@ function convertAmountToWords(amount) {
 
     return result;
     }
+
+
+    const formatDate = (date) => {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
 
    
 
@@ -263,10 +320,11 @@ function convertAmountToWords(amount) {
                       <p className='binders' style={{
                           fontSize: "48px",
                           color: "#0000FF", // Replace with the appropriate hex code for `$theme-blue`
-                          fontWeight: 600,
+                          fontWeight: 700,
                           marginLeft: "79px",
                           fontFamily: '"Free Sans", sans-serif',
-                          letterSpacing: "2px"
+                          letterSpacing: "2px",
+                          marginTop:'-12px'
                         }}>Book Binders</p>
                     </div>
                   </div>
@@ -314,7 +372,7 @@ function convertAmountToWords(amount) {
                   width: "40%",
                   border: "1px solid #000",
                   padding: "14px",
-                  minHeight: "386px"
+                  minHeight: "374px"
                 }}>
                   <p className='tax-btn' style={{
                     textAlign: "center",
@@ -326,7 +384,7 @@ function convertAmountToWords(amount) {
                     fontWeight: "700",
                     fontSize: "24px"
                   }}>Tax Invoice</p>
-                  <p className='invoice_no' style={{margin:'58px 0',
+                  <p className='invoice_no' style={{margin:'48px 0',
                             textAlign: "center",
                             fontSize: "28px",
                             fontWeight: "bold"
@@ -336,7 +394,7 @@ function convertAmountToWords(amount) {
                     fontSize: "28px",
                     fontWeight: "bold",
                     marginBottom: "18px"
-                  }}>Date: {invoice.date.toLocaleDateString()}</p>
+                  }}>Date: {formatDate(invoice.date)}</p>
                 </div>
               </div>
               <div className="client_info" style={{
@@ -349,13 +407,13 @@ function convertAmountToWords(amount) {
                   alignItems: "start"
                 }}>
                 <div className="left" style={{width: "50%"}}>
-                <h2 className='client_name' style={{marginBottom: "12px", fontSize: "24px"}}>{invoice.clientname}</h2>
+                <h2 className='client_name' style={{marginBottom: "12px", fontSize: "25px"}}>{invoice.clientname}</h2>
                 <p className='address' style={{marginBottom: '12px',fontSize: '22px'}}>{invoice.address}</p>
                 <p className='gstin' style={{marginBottom: '12px',fontSize: '22px', fontWeight: 'bold'}}>GSTIN: {invoice.gstin}</p>
                 <p className='state' style={{marginBottom: '12px',fontSize: '22px'}}>State Name: Maharashtra, Code: 27</p>
                 </div>
                 <div className="right" style={{width: '50%',textAlign: 'center'}}>
-                  <p className='remark' style={{fontWeight: 'bold',fontSize: '20px'}}>{invoice.remark}</p>
+                  <p className='remark' style={{fontWeight: 'bold',fontSize: '22px'}}>{invoice.remark}</p>
                 </div>
               </div>
               <div className="particulars" style={{width: '100%'}}>

@@ -479,10 +479,11 @@ $theme-blue: #4D4DFF;
                 .binders{
                   font-size: 48px;
                   color: $theme-blue;
-                  font-weight: 600;
+                  font-weight: 700;
                   margin-left: 79px;
                   font-family: "Free Sans", sans-serif;
                   letter-spacing: 2px;
+                  margin-top: -12px;
                 }
               }
 
@@ -511,7 +512,7 @@ $theme-blue: #4D4DFF;
             width: 40%;
             border: 1px solid #000;
             padding: 14px;
-            min-height: 386px;
+            min-height: 374px;
 
             .tax-btn{
               text-align: center;
