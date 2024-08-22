@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog,shell } = require('electron');
 const path = require('node:path');
 const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList, addInvoice, updateClient, addAddress, deleteAddress,deleteInvoice } = require('./server.js');
 
@@ -6,6 +6,7 @@ const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, get
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
+const fs = require('fs');
 
 const createWindow = () => {
   // Create the browser window.
@@ -139,3 +140,29 @@ ipcMain.on('print-invoice', (event) => {
     });
 });
 
+
+
+ipcMain.on('generatePDF', async (event, pdfBase64) => {
+  // Decode Base64 to Buffer
+  const pdfData = Buffer.from(pdfBase64.split(',')[1], 'base64');
+
+  // Create a Blob URL from the Buffer
+  const pdfBlob = new Blob([pdfData], { type: 'application/pdf' });
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+
+  // Open the PDF in a new window for printing
+  const printWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+          nodeIntegration: false
+      }
+  });
+
+  printWindow.loadURL(pdfUrl);
+  printWindow.webContents.on('did-finish-load', () => {
+      printWindow.webContents.print({}, (success, failureReason) => {
+          if (!success) console.log('Failed to print PDF:', failureReason);
+          printWindow.close();
+      });
+  });
+});

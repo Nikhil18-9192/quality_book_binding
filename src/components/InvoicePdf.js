@@ -87,107 +87,30 @@ function InvoicePdf({invoice, setInvoice}) {
     }
 
 
-// const print = async () => {
-//   fetchParticulars();
-//   const [integerPart, fractionalPart] = invoice.total.toString().split('.');
-//   if (fractionalPart !== '00') {
-//     const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
-//     if (isRoundOff) {
-//       const round = roundValue(invoice.total);
-//       console.log(round,'test')
-//       setRoundValues(round);
-//     }
-//   }
-
-//   const printWindow = window.open('', '', 'width=1600,height=1000');
-//   const printContent = document.getElementById('generatePdf').outerHTML;
-
-//   // Clone styles
-//   const styleSheets = Array.from(document.styleSheets).reduce((styles, styleSheet) => {
-//     try {
-//       if (styleSheet.cssRules) {
-//         const cssRules = Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('\n');
-//         return styles + cssRules;
-//       }
-//     } catch (e) {
-//       console.warn('Could not load stylesheet:', styleSheet.href);
-//     }
-//     return styles;
-//   }, '');
-
-//   // Write the HTML structure for printing
-//   printWindow.document.write(`
-//     <html>
-//       <head>
-//         <style>${styleSheets}</style>
-//       </head>
-//       <body>${printContent}</body>
-//     </html>
-//   `);
-  
-//   printWindow.document.close();
-  
-//   // Give some time for the new window to load before printing
-//   printWindow.onload = window.electronAPI.print('print-invoice', `Invoice-${invoice.invoiceno}.pdf`);
-//   // generateReceipt()
-//   // printWindow.close();
-//   // setInvoice(null)
-  
-// };
-
 const print = async () => {
-  fetchParticulars();
-  const [integerPart, fractionalPart] = invoice.total.toString().split('.');
-  
-  if (fractionalPart !== '00') {
-    const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
-    if (isRoundOff) {
-      const round = roundValue(invoice.total);
-      setRoundValues(round);
-    }
-  }
 
-  const printWindow = window.open('', '', 'width=1600,height=1000');
-  const printContent = document.getElementById('generatePdf').outerHTML;
+  const input = document.getElementById('generatePdf');
+    html2canvas(input).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-  // Clone styles
-  const styleSheets = Array.from(document.styleSheets).reduce((styles, styleSheet) => {
-    try {
-      if (styleSheet.cssRules) {
-        const cssRules = Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('\n');
-        return styles + cssRules;
-      }
-    } catch (e) {
-      console.warn('Could not load stylesheet:', styleSheet.href);
-    }
-    return styles;
-  }, '');
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-  // Write the HTML structure for printing
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Invoice</title>
-        <style>${styleSheets}</style>
-      </head>
-      <body onload="window.focus(); window.print();">
-        ${printContent}
-      </body>
-    </html>
-  `);
+        // Convert PDF to Base64
+        const pdfBase64 = pdf.output('datauristring');
+        window.electronAPI.generatePDF('generatePDF', pdfBase64);
 
-  printWindow.document.close();
+        pdf.save(`Invoice-${invoice.invoiceno}.pdf`);
+    });
 
-  // Optional: Close the print window after printing
-  // printWindow.onafterprint = () => {
-  //   printWindow.close();
-  // };
 };
 
 
       const fetchParticulars = async()=>{
             const result = await window.electronAPI.getParticulars(invoice.invoiceno);
-            console.log(result,'particulars')
             setParticulars(result)
         }
         
@@ -251,12 +174,28 @@ function convertAmountToWords(amount) {
       return `${day}/${month}/${year}`;
     };
 
-   
+    const handlePrint = async () => {
+      fetchParticulars();
+
+      const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
+      if (isRoundOff) {
+          const round = roundValue(invoice.total);
+          setRoundValues(round);
+      } else {
+          print(); // Call print immediately if no round-off is required
+      }
+  };
 
 
       useEffect(() => {
         // fetchParticulars()
-        print()
+        if(roundValues !== null){
+          print()
+        }
+        
+      },[roundValues])
+      useEffect(() => {
+        handlePrint()
       },[])
   return (
     <div className='addclient'>

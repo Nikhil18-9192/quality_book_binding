@@ -101,6 +101,13 @@ $theme-blue: #4D4DFF;
     outline: none; /* outline-none */
     opacity: 0.8; /* opacity-80 */
     height: 22px;
+    color: #000;
+    font-weight: 400;
+    &::placeholder{
+      color: #000;
+      font-weight: 400;
+      font-size: 14px;
+    }
   }
 
   .date_filter{
@@ -738,6 +745,8 @@ $theme-blue: #4D4DFF;
                 border: 1px solid #ccc;
                 border-radius: 5px;
                 font-size: 16px;
+                color: #000;
+                font-weight: 400;
               }
             }
           }
@@ -760,6 +769,8 @@ $theme-blue: #4D4DFF;
                 border: 1px solid #ccc;
                 border-radius: 5px;
                 font-size: 16px;
+                color: #000;
+                font-weight: 400;
               }
       
               textarea {

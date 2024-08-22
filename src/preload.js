@@ -5,7 +5,9 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
 
     print: (channel, data) => {
-        console.log(channel, data)
+        ipcRenderer.send(channel, data)
+    },
+    generatePDF: (channel, data) => {
         ipcRenderer.send(channel, data)
     },
     fetchClients: async () => {
