@@ -1,12 +1,14 @@
-const { app, BrowserWindow, ipcMain, dialog,shell } = require('electron');
-const path = require('node:path');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const { getClients, getClientAddress, getInvoice, getInvoiceReg, addClients, getClient, getInvoiceByInvoiceNo,getInvoicesByDateRange, getParticulars, getInvoiceDetails,getAddressList, addInvoice, updateClient, addAddress, deleteAddress,deleteInvoice } = require('./server.js');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
-const fs = require('fs');
+// const fs = require('fs');
 
 const createWindow = () => {
   // Create the browser window.
@@ -23,21 +25,6 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-  // Handle navigation and refresh
-  // mainWindow.webContents.on('will-navigate', (event, url) => {
-  //   event.preventDefault();
-  //   if (url !== MAIN_WINDOW_WEBPACK_ENTRY) {
-  //     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).then(() => {
-  //       mainWindow.webContents.executeJavaScript(`window.history.pushState({}, "", "${url}")`);
-  //     });
-  //   }
-  // });
-
-  // mainWindow.webContents.on('did-fail-load', () => {
-  //   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  // });
-
 
 };
 
@@ -142,27 +129,40 @@ ipcMain.on('print-invoice', (event) => {
 
 
 
-ipcMain.on('generatePDF', async (event, pdfBase64) => {
-  // Decode Base64 to Buffer
-  const pdfData = Buffer.from(pdfBase64.split(',')[1], 'base64');
-
-  // Create a Blob URL from the Buffer
-  const pdfBlob = new Blob([pdfData], { type: 'application/pdf' });
-  const pdfUrl = URL.createObjectURL(pdfBlob);
-
+ipcMain.on('generatePDF', async (event, htmlContent) => {
+  
+  
   // Open the PDF in a new window for printing
-  const printWindow = new BrowserWindow({
-      show: false,
-      webPreferences: {
-          nodeIntegration: false
-      }
-  });
+  const printWindow = new BrowserWindow(
+    {
+      width: 800,
+    height: 800,
+    show:true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+    } 
+  );
 
-  printWindow.loadURL(pdfUrl);
+  printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
   printWindow.webContents.on('did-finish-load', () => {
-      printWindow.webContents.print({}, (success, failureReason) => {
-          if (!success) console.log('Failed to print PDF:', failureReason);
-          printWindow.close();
+    const pdfPath = path.join(os.homedir(), 'Desktop', 'Invoice.pdf');
+
+    // Generate PDF
+    printWindow.webContents.printToPDF({
+      preferCSSPageSize:true,
+      printBackground: true,
+      pageSize: 'A4',
+    }).then(data => {
+      fs.writeFile(pdfPath, data, (error) => {
+        if (error) throw error;
+        console.log(`Wrote PDF successfully to ${pdfPath}`);
+        // printWindow.close();
       });
+    }).catch(error => {
+      console.log(`Failed to write PDF to ${pdfPath}: `, error);
+      // printWindow.close();
+    });
   });
 });
