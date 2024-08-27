@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -130,7 +130,7 @@ ipcMain.on('print-invoice', (event) => {
 
 
 ipcMain.on('generatePDF', async (event, htmlContent) => {
-  
+
   
   // Open the PDF in a new window for printing
   const printWindow = new BrowserWindow(
@@ -157,12 +157,29 @@ ipcMain.on('generatePDF', async (event, htmlContent) => {
     }).then(data => {
       fs.writeFile(pdfPath, data, (error) => {
         if (error) throw error;
-        console.log(`Wrote PDF successfully to ${pdfPath}`);
-        // printWindow.close();
+        
+        // Automatically print the PDF silently using the default printer
+        printWindow.webContents.print({
+          silent: true,
+          printBackground: true,
+          deviceName: '' // Leave empty to use the default printer
+        }, (success, failureReason) => {
+          if (!success) {
+            console.error('Failed to print:', failureReason);
+          } else {
+            printWindow.close();
+            shell.openPath(pdfPath).then(() => {
+              console.log('PDF opened successfully');
+            }).catch(error => {
+              console.error('Failed to open PDF: ', error);
+            });
+            return true
+          }
+        });   
       });
     }).catch(error => {
       console.log(`Failed to write PDF to ${pdfPath}: `, error);
-      // printWindow.close();
+      printWindow.close();
     });
   });
 });

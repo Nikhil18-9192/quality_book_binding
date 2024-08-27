@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import InvoicePdf from './InvoicePdf';
+import Pdf from './Pdf';
 
 function InvoiceRegister() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
+  const [print, setPrint] = useState(false)
   const [client, setClient] = useState({
     clientname:'',
     clientid:'',
@@ -219,6 +221,7 @@ function InvoiceRegister() {
           })
           
           setInvoice(result.invoice)
+          setPrint(true)
         }
         
       } catch (error) {
@@ -351,7 +354,8 @@ function InvoiceRegister() {
             </div>
         </form>
       </div>
-      {invoice && <InvoicePdf invoice={invoice} setInvoice={setInvoice}/>}
+      {/* {invoice && <InvoicePdf invoice={invoice} setInvoice={setInvoice}/>} */}
+      {print && <Pdf invoice={invoice} setPrint={setPrint}/>}
     </div>
   )
 }

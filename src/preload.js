@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     generatePDF: (channel, data) => {
         ipcRenderer.send(channel, data)
     },
+
     fetchClients: async () => {
         try {
             const result = await ipcRenderer.invoke('fetchClients');

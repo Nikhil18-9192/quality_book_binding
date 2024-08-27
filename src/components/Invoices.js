@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import ConfirmModal from './ConfirmModal.js';
 import "react-toastify/dist/ReactToastify.css";
 import {createRoot} from 'react-dom/client';
+import Pdf from './Pdf.js';
 // import InvoicePdf from './InvoicePdf';
 
 function Invoices() {
@@ -16,6 +17,7 @@ function Invoices() {
   const [totalPages, setTotalPages] = useState(0)
   const [searchDate, setSearchDate] = useState({from:'',to:''})
   const [invoice, setInvoice] = useState(null)
+  const [print, setPrint] = useState(false)
 
   const fetchInvoiceReg = async () => {
     try {
@@ -46,6 +48,7 @@ function Invoices() {
 
   const handleView = async(invoice)=>{
     try {
+      setPrint(!print)
         setInvoice(invoice)
     } catch (error) {
         console.log('Error querying database:', error)
@@ -152,6 +155,7 @@ function Invoices() {
       fetchInvoiceReg();
     }
   }, [pageNumber])
+  
   useEffect(()=>{
     getToday()
   },[])
@@ -214,7 +218,9 @@ function Invoices() {
           </tbody>
         </table>
       </div>
-      {invoice != null ? <InvoicePdf invoice={invoice} setInvoice={setInvoice} /> : null}
+      {/* {invoice != null ? <InvoicePdf invoice={invoice} setInvoice={setInvoice} /> : null} */}
+      {print ? <Pdf invoice={invoice} setPrint={setPrint} /> : null}
+      
       
     </div>
   )
