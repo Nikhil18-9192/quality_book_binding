@@ -131,7 +131,6 @@ ipcMain.on('print-invoice', (event) => {
 
 ipcMain.on('generatePDF', async (event, htmlContent) => {
 
-  
   // Open the PDF in a new window for printing
   const printWindow = new BrowserWindow(
     {
@@ -147,13 +146,20 @@ ipcMain.on('generatePDF', async (event, htmlContent) => {
 
   printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
   printWindow.webContents.on('did-finish-load', () => {
-    const pdfPath = path.join(os.homedir(), 'Desktop', 'Invoice.pdf');
+    const pdfPath = path.join(os.homedir(), 'Desktop', `Invoice.pdf`);
 
     // Generate PDF
     printWindow.webContents.printToPDF({
       preferCSSPageSize:true,
       printBackground: true,
-      pageSize: 'A4',
+      pageSize: 'A4',           // You can uncomment or specify 'A4' or any other size here
+  marginsType: 0,           // 0: default, 1: no margins, 2: minimum margins
+  margins: {
+    top: 0.08,   // top margin in inches
+    bottom: 0.10, // bottom margin in inches
+    left: 0.12,  // left margin in inches
+    right: 0.12  // right margin in inches
+  },
     }).then(data => {
       fs.writeFile(pdfPath, data, (error) => {
         if (error) throw error;
@@ -183,3 +189,4 @@ ipcMain.on('generatePDF', async (event, htmlContent) => {
     });
   });
 });
+

@@ -22,6 +22,7 @@ function Invoices() {
   const fetchInvoiceReg = async () => {
     try {
       const result = await window.electronAPI.fetchInvoice(pageNumber);
+      console.log(result)
       setTotalPages(result.totalPages)
       setInvoiceReg(result.data);
   } catch (error) {
