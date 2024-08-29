@@ -260,6 +260,7 @@ function InvoiceRegister() {
                     }
                 </select>
             </div>
+            
             <div>
                 <label htmlFor="clientAddress">Client Address</label>
                 <select name="address" id="address" value={invoiceDetail.address} onChange={e=> handleSelectAddress(e)}>

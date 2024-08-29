@@ -143,7 +143,7 @@ const roundValue = (value) =>{
                                   fontWeight: "bold",
                                   fontSize: "18px",
                                   color: "blueviolet",
-                                  width: "50%",
+                                  width: "56%",
                                   textAlign: "center",
                                   margin: "0",
                                 }}>All King Of Official Book Binding</p>
@@ -210,7 +210,7 @@ const roundValue = (value) =>{
             width: "40%",
             border: "1px solid #000",
             padding: "14px",
-            minHeight: "322px"
+            minHeight: "324px"
           }}>
             <p className='tax-btn' style={{
               textAlign: "center",
