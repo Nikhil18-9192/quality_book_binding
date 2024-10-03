@@ -257,7 +257,7 @@ const roundValue = (value) =>{
                     <tr key={index}>
                       
                       <td className='table-data ' >{item.invoiceno}</td>
-                      <td className='table-data' style={{ textAlign: 'center'}}>{item.date.toLocaleDateString()}</td>
+                      <td className='table-data' style={{ textAlign: 'center'}}>{item.date.toLocaleDateString('en-GB')}</td>
                       <td className='table-data' style={{ textAlign: 'left'}}>{item.clientname}</td>
                       <td className='table-data' style={{ textAlign: 'center'}}>{item.gstin}</td>
                       <td className='table-data' style={{ textAlign: 'center'}}>18%</td>

@@ -130,7 +130,7 @@ function GstSummery() {
             {invoices.map((invoice, i) => (
               <tr key={i}>
                 <td className='table_data'>{invoice.invoiceno}</td>
-                <td className='table_data'>{invoice.date.toLocaleDateString()}</td>
+                <td className='table_data'>{invoice.date.toLocaleDateString('en-GB')}</td>
                 <td className='table_data' style={{textAlign:'left'}}>{invoice.clientname}</td>
                 <td className='table_data'>{invoice.gstin}</td>
                 <td className='table_data'>18%</td>
