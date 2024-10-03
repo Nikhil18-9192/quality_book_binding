@@ -18,46 +18,27 @@ function Invoices() {
   const [searchDate, setSearchDate] = useState({from:'',to:''})
   const [invoice, setInvoice] = useState(null)
   const [print, setPrint] = useState(false)
-
-  const fetchInvoiceReg = async () => {
-    try {
-      const result = await window.electronAPI.fetchInvoice(pageNumber);
-      console.log(result)
-      setTotalPages(result.totalPages)
-      setInvoiceReg(result.data);
-  } catch (error) {
-      console.error('Error querying database:', error);
-  }
-  }
-   
-
-  const handleSearch = async(e) => {
-    try {
-      const invoiceno = e.target.value
-      console.log(typeof invoiceno);
-      if(invoiceno == ""){
-        fetchInvoiceReg();
-        return
-      }
-      const data = await window.electronAPI.getInvoiceByInvoiceNo(invoiceno);
-      setTotalPages(data.totalPages)
-      setInvoiceReg(data.data);
-    } catch (error) {
-      console.error('Error querying database:', error);
-    }
-  }
-
-  const handleView = async(invoice)=>{
-    try {
-      setPrint(!print)
-        setInvoice(invoice)
-    } catch (error) {
-        console.log('Error querying database:', error)
-        throw error
-    }
-  }
-  function showConfirmModal(message) {
+  const [roundValues, setRoundValues] = useState(null)
+  const [particulars, setParticulars] = useState([])
+  const roundValue = (value) =>{
+      // Round the value to the nearest integer
+      const roundedValue = Math.round(value);
+  
+      // Calculate the remaining fractional part
+      const remainingFractionalPart = Math.abs(value - roundedValue).toFixed(2);
       
+      // Determine if the fractional part was added or removed
+      const action = (roundedValue > value) ? 'added' : 'removed';
+  
+      return {
+          roundedValue: roundedValue.toFixed(2),
+          remainingFractionalPart: remainingFractionalPart,
+          action: action
+      };    
+  }
+
+  function showConfirmModal(message) {
+    
     return new Promise((resolve, reject) => {
       const modalRoot = document.createElement('div');
       const root = createRoot(modalRoot)
@@ -88,6 +69,58 @@ function Invoices() {
     });
   }
 
+  const fetchInvoiceReg = async () => {
+    try {
+      const result = await window.electronAPI.fetchInvoice(pageNumber);
+      console.log(result)
+      setTotalPages(result.totalPages)
+      setInvoiceReg(result.data);
+  } catch (error) {
+      console.error('Error querying database:', error);
+  }
+  }
+   
+
+  const handleSearch = async(e) => {
+    try {
+      const invoiceno = e.target.value
+      console.log(typeof invoiceno);
+      if(invoiceno == ""){
+        fetchInvoiceReg();
+        return
+      }
+      const data = await window.electronAPI.getInvoiceByInvoiceNo(invoiceno);
+      setTotalPages(data.totalPages)
+      setInvoiceReg(data.data);
+    } catch (error) {
+      console.error('Error querying database:', error);
+    }
+  }
+
+  const handleView = async(invoice)=>{
+    
+    try {
+      if(print){
+        setPrint(false)
+        setRoundValues(null)
+      }
+      const result = await window.electronAPI.getParticulars(invoice.invoiceno);
+      setParticulars(result)
+      const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
+        
+      if (isRoundOff ) {
+          const round = roundValue(invoice.total);
+          setRoundValues(round)
+      }
+      setPrint(true)
+      setInvoice(invoice)
+    } catch (error) {
+        console.log('Error querying database:', error)
+        throw error
+    }
+  }
+  
+
   const handleDelete = async(invoice)=>{
     try {
       const Confirmation = await showConfirmModal("Are you sure you want to delete this invoice?")
@@ -108,7 +141,6 @@ function Invoices() {
   }
 
   const next = ()=>{
-    console.log(pageNumber, totalPages)
     if(pageNumber < totalPages){
       setPageNumber(pageNumber + 1)
     }
@@ -116,7 +148,6 @@ function Invoices() {
   }
 
   const handleChangeDate = (e)=>{
-    console.log(e.target.name, e.target.value)
     setSearchDate({...searchDate, [e.target.name]: e.target.value})
   }
   const handleDateSearch = async()=>{
@@ -159,6 +190,7 @@ function Invoices() {
   
   useEffect(()=>{
     getToday()
+    
   },[])
   return (
     <div className='clients'>
@@ -220,8 +252,7 @@ function Invoices() {
         </table>
       </div>
       {/* {invoice != null ? <InvoicePdf invoice={invoice} setInvoice={setInvoice} /> : null} */}
-      {print ? <Pdf invoice={invoice} setPrint={setPrint} /> : null}
-      
+      {print ? <Pdf invoice={invoice} setPrint={setPrint} roundValues={roundValues} setRoundvalues={setRoundValues} particulars={particulars} setParticulars={setParticulars} /> : null}
       
     </div>
   )

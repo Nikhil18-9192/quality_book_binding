@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import ConfirmModal from './ConfirmModal';
 import {createRoot} from 'react-dom/client';
 
-function Pdf({invoice, setPrint}) {
-    const [particulars, setParticulars] = useState([])
-    const [roundValues, setRoundValues] = useState(null)
+function Pdf({invoice, setPrint, roundValues,setRoundvalues, particulars ,setParticulars}) {
+    // const [particulars, setParticulars] = useState([])
+    // const [roundValues, setRoundValues] = useState(null)
+    // const [isRound, setIsRound] = useState(false)
     const roundValue = (value) =>{
         // Round the value to the nearest integer
         const roundedValue = Math.round(value);
@@ -63,10 +64,10 @@ const print = async () => {
 };
 
 
-      const fetchParticulars = async()=>{
-            const result = await window.electronAPI.getParticulars(invoice.invoiceno);
-            setParticulars(result)
-        }
+      // const fetchParticulars = async()=>{
+      //       const result = await window.electronAPI.getParticulars(invoice.invoiceno);
+      //       setParticulars(result)
+      //   }
         
 
       function numberToWords(num) {
@@ -130,17 +131,20 @@ function convertAmountToWords(amount) {
 
     const handlePrint = async () => {
       
-     await fetchParticulars();
-    
-        const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
-      if (isRoundOff ) {
-          const round = roundValue(invoice.total);
-          setRoundValues(round);
-          print()
+      // await fetchParticulars();
+      
+      //   const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
+        
+      // if (isRoundOff ) {
+      //     setIsRound(true)
+      //     const round = roundValue(invoice.total);
+      //     setRoundValues(round);
+      //     print()
           
-      } else {
-          print(); // Call print immediately if no round-off is required
-      }
+      // } else {
+      //     print(); // Call print immediately if no round-off is required
+      // }
+      print();
       
   };
 
@@ -149,7 +153,9 @@ function convertAmountToWords(amount) {
         handlePrint()
 
         return () => {
-          setPrint(false)
+          // setPrint(false)
+          // setRoundvalues(null)
+          // setParticulars([])
         }
         
       },[])
@@ -490,8 +496,6 @@ function convertAmountToWords(amount) {
                             borderBottom: "1px solid #000",
                             fontSize: "16px"
                           }}>Round Off :</td>
-                        
-                        
                       </tr>
                         }
                         
@@ -504,7 +508,7 @@ function convertAmountToWords(amount) {
                           
                         </tr>
                         {
-                          roundValues === null &&
+                          roundValues !== null &&
                           <tr>
                             <td className='td' style={{border: 'none', fontWeight: 'bold',
                             padding: "14px",
@@ -560,7 +564,8 @@ function convertAmountToWords(amount) {
                           
                           
                         </tr>
-                        {roundValues === null && 
+                        
+                        {roundValues !== null && 
                         <tr>
                           <td className='td' style={{border: 'none',
                             padding: "14px",

@@ -4,6 +4,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import InvoicePdf from './InvoicePdf';
 import Pdf from './Pdf';
+import {createRoot} from 'react-dom/client';
+import ConfirmModal from './ConfirmModal.js';
 
 function InvoiceRegister() {
   const navigate = useNavigate();
@@ -45,6 +47,59 @@ function InvoiceRegister() {
   })
 
   const [invoice, setInvoice] = useState(null)
+
+  const [roundValues, setRoundValues] = useState(null)
+  const [particulars, setParticulars] = useState([])
+  const roundValue = (value) =>{
+      // Round the value to the nearest integer
+      const roundedValue = Math.round(value);
+  
+      // Calculate the remaining fractional part
+      const remainingFractionalPart = Math.abs(value - roundedValue).toFixed(2);
+      
+      // Determine if the fractional part was added or removed
+      const action = (roundedValue > value) ? 'added' : 'removed';
+  
+      return {
+          roundedValue: roundedValue.toFixed(2),
+          remainingFractionalPart: remainingFractionalPart,
+          action: action
+      };    
+  }
+
+  function showConfirmModal(message) {
+    
+    return new Promise((resolve, reject) => {
+      const modalRoot = document.createElement('div');
+      const root = createRoot(modalRoot)
+      document.body.appendChild(modalRoot);
+  
+      const handleConfirm = () => {
+        cleanup();
+        resolve(true);
+      };
+  
+      const handleCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+  
+      const cleanup = () => {
+        root.unmount();
+        document.body.removeChild(modalRoot);
+      };
+  
+      root.render(
+        <ConfirmModal
+          message={message}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      );
+    });
+  }
+
+
 
   const goBack = () => {
     navigate(-1)
@@ -220,6 +275,19 @@ function InvoiceRegister() {
             sacforclient:''
           })
           
+          if(print){
+            setPrint(false)
+            setRoundValues(null)
+          }
+          const data = await window.electronAPI.getParticulars(result.invoice.invoiceno);
+          setParticulars(data)
+          const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
+            
+          if (isRoundOff ) {
+              const round = roundValue(result.invoice.total);
+              setRoundValues(round)
+          }
+
           setInvoice(result.invoice)
           setPrint(true)
         }
@@ -356,7 +424,7 @@ function InvoiceRegister() {
         </form>
       </div>
       {/* {invoice && <InvoicePdf invoice={invoice} setInvoice={setInvoice}/>} */}
-      {print && <Pdf invoice={invoice} setPrint={setPrint}/>}
+      {print && <Pdf invoice={invoice} setPrint={setPrint} roundValues={roundValues} setRoundvalues={setRoundValues} particulars={particulars} setParticulars={setParticulars}/>}
     </div>
   )
 }

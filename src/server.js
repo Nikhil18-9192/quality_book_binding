@@ -151,12 +151,12 @@ async function getInvoicesByDateRange(dateFrom, dateTo, pageNumber) {
     const countQuery = 'SELECT COUNT(*) FROM invoicedb WHERE date BETWEEN $1 AND $2';
     const countResult = await pool.query(countQuery, [dateFrom, dateTo]);
     const totalRows = parseInt(countResult.rows[0].count, 10);
-    const allData = await pool.query('SELECT * FROM invoicedb WHERE date BETWEEN $1 AND $2',[dateFrom, dateTo]);
+    const allData = await pool.query('SELECT * FROM invoicedb WHERE date BETWEEN $1 AND $2 ORDER BY invoiceno',[dateFrom, dateTo]);
     // Calculate the total number of pages
     const totalPages = Math.ceil(totalRows / pageSize);
 
     // Query to get the data within the provided date range with pagination
-    const query = 'SELECT * FROM invoicedb WHERE date BETWEEN $1 AND $2 ORDER BY date LIMIT $3 OFFSET $4';
+    const query = 'SELECT * FROM invoicedb WHERE date BETWEEN $1 AND $2 ORDER BY invoiceno LIMIT $3 OFFSET $4';
     const result = await pool.query(query, [dateFrom, dateTo, pageSize, offset]);
 
     return {

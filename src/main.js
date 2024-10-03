@@ -155,10 +155,10 @@ ipcMain.on('generatePDF', async (event, htmlContent) => {
       pageSize: 'A4',           // You can uncomment or specify 'A4' or any other size here
   marginsType: 0,           // 0: default, 1: no margins, 2: minimum margins
   margins: {
-    top: 0.08,   // top margin in inches
-    bottom: 0.10, // bottom margin in inches
-    left: 0.12,  // left margin in inches
-    right: 0.12  // right margin in inches
+    top: 0.04,   // top margin in inches
+    bottom: 0.08, // bottom margin in inches
+    left: 0.08,  // left margin in inches
+    right: 0.08  // right margin in inches
   },
     }).then(data => {
       fs.writeFile(pdfPath, data, (error) => {

@@ -742,7 +742,7 @@ $theme-blue: #4D4DFF;
       
               input, select {
                 padding: 10px;
-                border: 1px solid #ccc;
+                border: 2px solid #000;
                 border-radius: 5px;
                 font-size: 16px;
                 color: #000;
@@ -766,7 +766,7 @@ $theme-blue: #4D4DFF;
       
               input {
                 padding: 10px;
-                border: 1px solid #ccc;
+                border: 2px solid #000;
                 border-radius: 5px;
                 font-size: 16px;
                 color: #000;
@@ -775,7 +775,7 @@ $theme-blue: #4D4DFF;
               }
                textarea {
                 padding: 10px;
-                border: 1px solid #ccc;
+                border: 2px solid #000;
                 border-radius: 5px;
                 font-size: 16px;
                 color: #000;
@@ -808,7 +808,7 @@ $theme-blue: #4D4DFF;
             padding: 16px;
             max-height: 215px;
             overflow-y: scroll;
-            border: 1px solid #000;
+            border: 1px solid #ccc;
             &::-webkit-scrollbar {
               width: 6px; /* Width of the scrollbar */
             }
@@ -897,7 +897,7 @@ $theme-blue: #4D4DFF;
               }
               textarea{
                 padding: 10px;
-                border: 1px solid #ccc;
+                border: 2px solid #000;
                 border-radius: 5px;
                 font-size: 16px;
                 width: 80%;
