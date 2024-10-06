@@ -508,7 +508,7 @@ function convertAmountToWords(amount) {
                           
                         </tr>
                         {
-                          roundValues !== null &&
+                          roundValues === null &&
                           <tr>
                             <td className='td' style={{border: 'none', fontWeight: 'bold',
                             padding: "14px",
@@ -565,7 +565,7 @@ function convertAmountToWords(amount) {
                           
                         </tr>
                         
-                        {roundValues !== null && 
+                        {roundValues === null && 
                         <tr>
                           <td className='td' style={{border: 'none',
                             padding: "14px",
