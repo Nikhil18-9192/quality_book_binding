@@ -308,13 +308,13 @@ function convertAmountToWords(amount) {
             justifyContent: "space-between",
             alignItems: "start"
           }}>
-          <div className="left" style={{width: "65%"}}>
+          <div className="left" style={{width: "70%"}}>
           <h2 className='client_name' style={{margin: "0 0 6px 0", fontSize: "20px"}}>{invoice.clientname}</h2>
           <p className='address' style={{margin: "0 0 6px 0", fontSize: "18px"}}>{invoice.address}</p>
           <p className='gstin' style={{margin: '0 0 8px 0',fontSize: '17px', fontWeight: 'bold'}}>GSTIN: {invoice.gstin}</p>
           <p className='state' style={{margin: '0 0 8px 0',fontSize: '18px'}}>State Name: Maharashtra, Code: 27</p>
           </div>
-          <div className="right" style={{width: '35%',textAlign: 'center'}}>
+          <div className="right" style={{width: '30%',textAlign: 'center'}}>
             <p className='remark' style={{fontWeight: 'bold',fontSize: '18px'}}>{invoice.remark}</p>
           </div>
         </div>
