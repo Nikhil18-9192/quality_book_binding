@@ -65,7 +65,7 @@ const print = async () => {
 
 
       // const fetchParticulars = async()=>{
-      //       const result = await window.electronAPI.getParticulars(invoice.invoiceno);
+      //       const result = await window.electronAPI.getParticulars(invoice);
       //       setParticulars(result)
       //   }
         
@@ -290,7 +290,7 @@ function convertAmountToWords(amount) {
                       textAlign: "center",
                       fontSize: "20px",
                       fontWeight: "bold"
-                    }}>Invoice No: {invoice.invoiceno}</p>
+                    }}>Invoice No: {invoice.invoice_code}</p>
             <p className='date' style={{
               textAlign: "center",
               fontSize: "20px",

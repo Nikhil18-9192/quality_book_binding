@@ -279,7 +279,7 @@ function InvoiceRegister() {
             setPrint(false)
             setRoundValues(null)
           }
-          const data = await window.electronAPI.getParticulars(result.invoice.invoiceno);
+          const data = await window.electronAPI.getParticulars(result.invoice);
           setParticulars(data)
           const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
             

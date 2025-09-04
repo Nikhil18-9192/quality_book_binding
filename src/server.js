@@ -170,10 +170,10 @@ async function getInvoicesByDateRange(dateFrom, dateTo, pageNumber) {
   }
 }
 
-async function getParticulars(id) {
+async function getParticulars(invoice) {
   try {
-    const query = `SELECT srno, invoiceno, particulars, quantity, rate, rowsubtotal, cgst, sgst, rowtotal, submitdate FROM invoicemaster WHERE invoiceno = $1`;
-    const values = [id];
+    const query = `SELECT srno, invoiceno, particulars, quantity, rate, rowsubtotal, cgst, sgst, rowtotal, submitdate FROM invoicemaster WHERE invoiceno = $1 AND invoice_code = $2`;
+    const values = [invoice.invoiceno, invoice.invoice_code];
     const result = await pool.query(query, values);
     return result.rows;
   } catch (error) {
@@ -243,8 +243,8 @@ async function addInvoice(invoiceDetails) {
 
     // Insert data into invoicemaster table
     const insertParticularsQuery = `
-      INSERT INTO invoicemaster (invoiceno, particulars, quantity, rate, rowsubtotal, cgst, sgst, rowtotal)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO invoicemaster (invoiceno, particulars, quantity, rate, rowsubtotal, cgst, sgst, rowtotal,invoice_code)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `;
 
     for (const item of invoiceDetails.perticulars) {
@@ -256,7 +256,8 @@ async function addInvoice(invoiceDetails) {
         item.subtotal,
         item.cgst,
         item.sgst,
-        item.total
+        item.total,
+        invoice.invoice_code
       ];
       await client.query(insertParticularsQuery, particularsValues);
     }
@@ -307,7 +308,7 @@ async function deleteInvoice(invoiceId) {
   
   try {
     // Delete from invoicemaster (invoice items)
-    const deleteItemsQuery = 'DELETE FROM invoicemaster WHERE invoiceno = $1';
+    const deleteItemsQuery = 'DELETE FROM invoicemaster WHERE invoiceno = $1 AND srno IS NULL';
     await pool.query(deleteItemsQuery, [invoiceId]);
 
     // Delete from invoiceDB (invoice)

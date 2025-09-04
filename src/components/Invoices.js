@@ -104,7 +104,7 @@ function Invoices() {
         setPrint(false)
         setRoundValues(null)
       }
-      const result = await window.electronAPI.getParticulars(invoice.invoiceno);
+      const result = await window.electronAPI.getParticulars(invoice);
       setParticulars(result)
       const isRoundOff = await showConfirmModal('Do you want to round off the amount?');
         
@@ -237,7 +237,7 @@ function Invoices() {
           <tbody>
             {invoiceReg.map((invoice, i) => (
               <tr key={i}>
-                <td className='table_data'>{invoice.invoiceno}</td>
+                <td className='table_data'>{invoice.invoice_code}</td>
                 <td className='table_data' style={{textAlign:'left'}}>{invoice.clientname}</td>
                 <td className='table_data'>{invoice.bankbranch}</td>
                 <td className='table_data'>{invoice.cgst}</td>

@@ -322,7 +322,7 @@ function convertAmountToWords(amount) {
                             textAlign: "center",
                             fontSize: "24px",
                             fontWeight: "bold"
-                          }}>Invoice No: {invoice.invoiceno}</p>
+                          }}>Invoice No: {invoice.invoice_code}</p>
                   <p className='date' style={{
                     textAlign: "center",
                     fontSize: "24px",
